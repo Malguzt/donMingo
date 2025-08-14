@@ -3,3 +3,9 @@ class User:
         self.id = id
         self.name = name
         self.email = email
+    
+    def __eq__(self, other):
+        return self.email == other.email
+    
+    def __hash__(self):
+        return hash(self.email)

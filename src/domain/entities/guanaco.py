@@ -9,15 +9,11 @@ class Guanaco:
         self.chat_message_repository = chat_message_repository
 
     def work(self):
-        messages = self.chat_message_repository.get_unread_messages(self.user)
-        for message in messages:
-            print(f"Message: {message.content}")
-            print(f"Sender: {message.sender.name}")
-            print(f"Receiver: {message.receiver.name}")
-            print(f"Created at: {message.created_at}")
-            if message.sender.email == self.user.email:
-                self.chat_message_repository.send_private_message(f"Hola {message.sender.name}", message.sender)
-                self.chat_message_repository.mark_as_read(message)
-        print(f"{self.name} has worked, total messages: {len(messages)}, going to sleep for 10 seconds...")
+        channels = self.chat_message_repository.get_streams_with_unread_messages()
+        for channel in channels.values():
+            print(f"Channel: {channel}")
+            if channel.get_last_message().sender != self.user:
+                channel.respond("Respondiendo canales ahora")
+        print(f"{self.name} has worked, going to sleep for 10 seconds...")
         sleep(10)
         self.work()
