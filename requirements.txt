@@ -1,2 +1,6 @@
 zulip
-python-dotenv>=1.0.1,<2.0.0
+python-dotenv
+arize
+transformers
+torch
+accelerate
