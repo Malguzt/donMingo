@@ -48,9 +48,7 @@ class TestZulipMapper:
             id=12345,
             content="Hello, how are you?",
             sender=mock_user,
-            created_at=mock_datetime_instance,
-            channel=42,
-            topic="General Discussion"
+            created_at=mock_datetime_instance
         )
         
         # Should return the created chat message
@@ -91,9 +89,7 @@ class TestZulipMapper:
             id=None,
             content=None,
             sender=mock_user,
-            created_at=mock_datetime_instance,
-            channel=None,
-            topic=None
+            created_at=mock_datetime_instance
         )
         
         # Should return the created chat message

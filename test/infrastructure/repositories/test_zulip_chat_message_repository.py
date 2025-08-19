@@ -416,44 +416,62 @@ class TestZulipChatMessageRepository:
         mock_client = mock_client_class.return_value
         mock_mapper = mock_mapper_class.return_value
         
-        # Mock unread messages
-        mock_message1 = Mock()
-        mock_message1.channel = "general"
-        mock_message1.topic = "Discussion"
+        # Mock raw messages (what comes from Zulip API)
+        raw_messages = [
+            {"stream_id": "42", "subject": "Discussion", "id": 1, "content": "Hello"},
+            {"stream_id": "43", "subject": "Chat", "id": 2, "content": "World"}
+        ]
         
+        # Mock unread messages response
+        unread_response = {
+            "result": "success",
+            "messages": raw_messages
+        }
+        mock_client.get_messages.return_value = unread_response
+        
+        # Mock ChatMessage objects
+        mock_message1 = Mock()
         mock_message2 = Mock()
-        mock_message2.channel = "random"
-        mock_message2.topic = "Chat"
+        mock_mapper.to_chat_message.side_effect = [mock_message1, mock_message2]
+        
+        # Mock channel creation
+        mock_channel1 = Mock()
+        mock_channel2 = Mock()
+        mock_channel_class.side_effect = [mock_channel1, mock_channel2]
+        
+        # Mock get_messages_from_channel to return additional messages
+        mock_channel_msg1 = Mock()
+        mock_channel_msg2 = Mock()
         
         repository = ZulipChatMessageRepository()
         
-        # Mock get_unread_messages
-        with patch.object(repository, 'get_unread_messages') as mock_get_unread:
-            mock_get_unread.return_value = [mock_message1, mock_message2]
+        with patch.object(repository, 'get_messages_from_channel') as mock_get_channel_msgs:
+            mock_get_channel_msgs.side_effect = [[mock_channel_msg1], [mock_channel_msg2]]
             
-            # Mock get_messages_from_channel
-            with patch.object(repository, 'get_messages_from_channel') as mock_get_channel_msgs:
-                mock_channel_msg1 = Mock()
-                mock_channel_msg2 = Mock()
-                mock_get_channel_msgs.side_effect = [[mock_channel_msg1], [mock_channel_msg2]]
-                
-                # Mock channel creation
-                mock_channel1 = Mock()
-                mock_channel2 = Mock()
-                mock_channel_class.side_effect = [mock_channel1, mock_channel2]
-                
-                result = repository.get_streams_with_unread_messages()
-                
-                # Should create channels for each unique stream
-                assert mock_channel_class.call_count == 2
-                
-                # Should add messages to channels
-                mock_channel1.add_message.assert_called_once_with(mock_channel_msg1)
-                mock_channel2.add_message.assert_called_once_with(mock_channel_msg2)
-                
-                # Should return channels
-                assert "general" in result
-                assert "random" in result
+            result = repository.get_streams_with_unread_messages()
+            
+            # Should create channels for each unique stream
+            assert mock_channel_class.call_count == 2
+            mock_channel_class.assert_any_call("42", "Discussion", [], repository)
+            mock_channel_class.assert_any_call("43", "Chat", [], repository)
+            
+            # Should add unread messages to channels
+            mock_channel1.add_message.assert_any_call(mock_message1)
+            mock_channel2.add_message.assert_any_call(mock_message2)
+            
+            # Should get additional messages from each channel
+            mock_get_channel_msgs.assert_any_call(mock_channel1)
+            mock_get_channel_msgs.assert_any_call(mock_channel2)
+            
+            # Should add channel messages
+            mock_channel1.add_message.assert_any_call(mock_channel_msg1)
+            mock_channel2.add_message.assert_any_call(mock_channel_msg2)
+            
+            # Should return channels by stream ID
+            assert "42" in result
+            assert "43" in result
+            assert result["42"] == mock_channel1
+            assert result["43"] == mock_channel2
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
     @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')

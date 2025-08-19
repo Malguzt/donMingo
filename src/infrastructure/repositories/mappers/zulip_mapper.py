@@ -9,7 +9,5 @@ class ZulipMapper:
             id=message.get("id"),
             content=message.get("content"),
             sender=User(platform_id=message.get("sender_id"), platform="zulip", name=message.get("sender_full_name")),
-            created_at= datetime.fromtimestamp(message.get("timestamp")),
-            channel=message.get("stream_id"),
-            topic=message.get("subject"),
+            created_at=datetime.fromtimestamp(message.get("timestamp")),
         )

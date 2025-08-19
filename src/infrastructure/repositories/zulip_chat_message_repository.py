@@ -22,7 +22,21 @@ class ZulipChatMessageRepository(ChatMessageRepository):
         self.mapper = ZulipMapper()
 
     def __group_messages_by_stream(self, messages: List[ChatMessage]) -> Dict[str, Channel]:
-        return {message.channel: Channel(message.channel, message.topic, [message for message in messages if message.channel], self) for message in messages}
+        # Group messages by stream using the raw message data
+        channels = {}
+        if hasattr(self, '_raw_messages'):
+            for i, raw_msg in enumerate(self._raw_messages):
+                stream_id = str(raw_msg.get("stream_id", ""))
+                topic = raw_msg.get("subject", "")
+                
+                if stream_id not in channels:
+                    channels[stream_id] = Channel(stream_id, topic, [], self)
+                
+                # Add the corresponding ChatMessage to the channel
+                if i < len(messages):
+                    channels[stream_id].add_message(messages[i])
+        
+        return channels
     
     def get_messages_from_channel(self, channel: Channel) -> List[ChatMessage]:
         messages = self.client.get_messages({
@@ -67,6 +81,8 @@ class ZulipChatMessageRepository(ChatMessageRepository):
             raise RuntimeError(f"Zulip API error: {response.get('msg')}")
 
         messages = response.get("messages", [])
+        # Store the original messages for channel grouping
+        self._raw_messages = messages
         return [self.mapper.to_chat_message(msg) for msg in messages]
     
     def send_private_message(self, message: str, user: User):

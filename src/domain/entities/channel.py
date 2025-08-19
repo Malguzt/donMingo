@@ -12,26 +12,26 @@ class Channel:
         self.messages = messages
         self.chat_message_repository = chat_message_repository
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.id == other.id and self.topic == other.topic
     
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.id, self.topic))
     
-    def __str__(self):
+    def __str__(self) -> str:
         text = f"Channel topic: {self.topic} \n Messages:"
         for message in self.messages:
             text += f"\n------------\n {message}"
         return text
     
-    def respond(self, message: str):
+    def respond(self, message: str) -> None:
         self.chat_message_repository.send_channel_message(message, self.id, self.topic)
         self.chat_message_repository.mark_as_read(self)
 
     def get_last_message(self) -> ChatMessage:
         return self.messages[-1]
 
-    def add_message(self, message: ChatMessage):
+    def add_message(self, message: ChatMessage) -> None:
         self.messages.append(message)
 
     def get_messages(self) -> List[ChatMessage]:

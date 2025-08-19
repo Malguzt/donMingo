@@ -160,21 +160,20 @@ class TestModelsHandler:
         handler = ModelsHandler()
         result = handler.generate_text("Hello, world!")
         
-        # Should tokenize input
-        mock_tokenizer.assert_called_with("Hello, world!", return_tensors="pt")
+        # Should tokenize input with new parameters
+        mock_tokenizer.assert_called_with("Hello, world!", return_tensors="pt", max_length=512, truncation=True)
         
         # Should move inputs to CUDA
         for tensor in mock_inputs.values():
             tensor.to.assert_called_with("cuda")
         
-        # Should generate with correct parameters
+        # Should generate with correct parameters (updated)
         mock_model.generate.assert_called_once()
         call_kwargs = mock_model.generate.call_args[1]
-        assert call_kwargs["max_new_tokens"] == 64
+        assert call_kwargs["max_new_tokens"] == 32  # Updated value
         assert call_kwargs["do_sample"] == False
-        assert call_kwargs["top_p"] == 0.9
-        assert call_kwargs["temperature"] == 0.7
         assert call_kwargs["pad_token_id"] == 1234
+        # No longer expecting top_p and temperature
         
         # Should decode output
         mock_tokenizer.decode.assert_called_once_with(mock_outputs[0], skip_special_tokens=True)
@@ -212,6 +211,8 @@ class TestModelsHandler:
         # Should use eos_token_id as pad_token_id
         call_kwargs = mock_model.generate.call_args[1]
         assert call_kwargs["pad_token_id"] == 5678
+        assert call_kwargs["max_new_tokens"] == 32
+        assert call_kwargs["do_sample"] == False
         assert result == "Generated text"
 
     @patch('infrastructure.transformers_engine.models_handler.AutoTokenizer')
@@ -315,3 +316,59 @@ class TestModelsHandler:
             tensor.to.assert_not_called()
         
         assert result == "CPU generated text"
+
+    @patch('infrastructure.transformers_engine.models_handler.AutoTokenizer')
+    @patch('infrastructure.transformers_engine.models_handler.AutoModelForCausalLM')
+    @patch('infrastructure.transformers_engine.models_handler.torch')
+    @patch('infrastructure.transformers_engine.models_handler.os')
+    def test_should_clean_html_tags_from_prompt(self, mock_os, mock_torch, mock_auto_model, mock_auto_tokenizer):
+        # Setup mocks
+        mock_torch.cuda.is_available.return_value = False
+        mock_torch.no_grad.return_value.__enter__ = Mock()
+        mock_torch.no_grad.return_value.__exit__ = Mock()
+        mock_os.cpu_count.return_value = 4
+        
+        mock_model = Mock()
+        mock_auto_model.from_pretrained.return_value = mock_model
+        
+        mock_tokenizer = Mock()
+        mock_tokenizer.pad_token_id = 1234
+        mock_auto_tokenizer.from_pretrained.return_value = mock_tokenizer
+        
+        mock_inputs = {"input_ids": Mock(), "attention_mask": Mock()}
+        mock_tokenizer.return_value = mock_inputs
+        
+        mock_outputs = [Mock()]
+        mock_model.generate.return_value = mock_outputs
+        mock_tokenizer.decode.return_value = "Cleaned response"
+        
+        handler = ModelsHandler()
+        result = handler.generate_text("<p>a ver ahora</p>")
+        
+        # Should clean HTML and tokenize the clean text
+        mock_tokenizer.assert_called_with("a ver ahora", return_tensors="pt", max_length=512, truncation=True)
+        assert result == "Cleaned response"
+
+    @patch('infrastructure.transformers_engine.models_handler.AutoTokenizer')
+    @patch('infrastructure.transformers_engine.models_handler.AutoModelForCausalLM')
+    @patch('infrastructure.transformers_engine.models_handler.torch')
+    @patch('infrastructure.transformers_engine.models_handler.os')
+    def test_should_handle_generation_exception(self, mock_os, mock_torch, mock_auto_model, mock_auto_tokenizer):
+        # Setup mocks
+        mock_torch.cuda.is_available.return_value = False
+        mock_os.cpu_count.return_value = 4
+        
+        mock_model = Mock()
+        mock_auto_model.from_pretrained.return_value = mock_model
+        
+        mock_tokenizer = Mock()
+        mock_auto_tokenizer.from_pretrained.return_value = mock_tokenizer
+        
+        # Mock generation failure
+        mock_model.generate.side_effect = Exception("Generation failed")
+        
+        handler = ModelsHandler()
+        result = handler.generate_text("test")
+        
+        # Should return error message
+        assert result == "I apologize, I'm having trouble generating a response right now."
