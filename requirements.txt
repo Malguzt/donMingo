@@ -4,3 +4,15 @@ arize
 transformers
 torch
 accelerate
+invoke
+pytest
+pytest-cov
+pytest-mock
+pytest-asyncio
+timeout-decorator
+coverage
+coverage-lcov
+pytest-xdist
+pytest-mock
+pytest-asyncio
+pytest-timeout

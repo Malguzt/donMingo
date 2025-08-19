@@ -13,10 +13,10 @@ class Channel:
         self.chat_message_repository = chat_message_repository
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.id == other.id and self.topic == other.topic
     
     def __hash__(self):
-        return hash(self.id)
+        return hash((self.id, self.topic))
     
     def __str__(self):
         text = f"Channel topic: {self.topic} \n Messages:"

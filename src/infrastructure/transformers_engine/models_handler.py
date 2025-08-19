@@ -58,7 +58,7 @@ class ModelsHandler:
             outputs = model.generate(
                 **inputs,
                 max_new_tokens=64,
-                do_sample=True,
+                do_sample=False,
                 top_p=0.9,
                 temperature=0.7,
                 pad_token_id=pad_token_id,

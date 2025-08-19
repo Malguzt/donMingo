@@ -13,19 +13,19 @@ if TYPE_CHECKING:
 class ChatMessageRepository(ABC):
     @abstractmethod
     def get_unread_messages(self, user: User) -> List[ChatMessage]:
-        pass
+        raise NotImplementedError("Not implemented")
     @abstractmethod
     def send_private_message(self, message: str, user: User):
-        pass
+        raise NotImplementedError("Not implemented")
     @abstractmethod
     def send_channel_message(self, message: str, channel_id: str, topic: str):
-        pass
+        raise NotImplementedError("Not implemented")
     @abstractmethod
     def send_thread_message(self, message: str, thread_id: str, topic: str):
-        pass
+        raise NotImplementedError("Not implemented")
     @abstractmethod
     def mark_as_read(self, channel: "Channel"):
-        pass
+        raise NotImplementedError("Not implemented")
     @abstractmethod
     def get_streams_with_unread_messages(self) -> Dict[str, "Channel"]:
-        pass
+        raise NotImplementedError("Not implemented")

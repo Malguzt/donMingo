@@ -8,7 +8,7 @@ class ZulipMapper:
         return ChatMessage(
             id=message.get("id"),
             content=message.get("content"),
-            sender=User(id=message.get("sender_id"), name=message.get("sender_full_name"), email=message.get("sender_email")),
+            sender=User(platform_id=message.get("sender_id"), platform="zulip", name=message.get("sender_full_name")),
             created_at= datetime.fromtimestamp(message.get("timestamp")),
             channel=message.get("stream_id"),
             topic=message.get("subject"),
