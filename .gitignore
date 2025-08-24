@@ -209,3 +209,8 @@ __marimo__/
 Icov.info
 cosmic-ray.session
 lcov.info
+.trunk/trunk.yaml
+.gitignore
+.trunk/configs/.isort.cfg
+.trunk/configs/.markdownlint.yaml
+.trunk/configs/ruff.toml
