@@ -1,8 +1,6 @@
 import pytest
 import time
-import threading
 from unittest.mock import Mock
-from types import SimpleNamespace
 from infrastructure.workers.guanaco_worker import GuanacoWorker
 from domain.entities.guanaco.guanaco import Guanaco
 

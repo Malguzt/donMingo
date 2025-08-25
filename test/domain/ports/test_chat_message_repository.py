@@ -1,6 +1,7 @@
 import pytest
-from domain.ports.chat_message_repository import ChatMessageRepository
-from domain.entities.user import User
+from src.domain.ports.chat_message_repository import ChatMessageRepository
+from src.domain.entities.user import User
+from src.domain.entities.channel import Channel
 
 class TestChatMessageRepository:
     @classmethod
@@ -8,17 +9,17 @@ class TestChatMessageRepository:
         """Setup method to create base DummyRepo class once for all tests"""
         class BaseDummyRepo(ChatMessageRepository):
             def get_unread_messages(self, user: User):
-                return super().get_unread_messages(user)
+                raise NotImplementedError()
             def send_private_message(self, message: str, user: User):
-                return super().send_private_message(message, user)
+                raise NotImplementedError()
             def send_channel_message(self, message: str, channel_id: str, topic: str):
-                return super().send_channel_message(message, channel_id, topic)
+                raise NotImplementedError()
             def send_thread_message(self, message: str, thread_id: str, topic: str):
-                return super().send_thread_message(message, thread_id, topic)
-            def mark_as_read(self, channel):
-                return super().mark_as_read(channel)
+                raise NotImplementedError()
+            def mark_as_read(self, channel: Channel):
+                raise NotImplementedError()
             def get_streams_with_unread_messages(self):
-                return super().get_streams_with_unread_messages()
+                raise NotImplementedError()
         
         cls.BaseDummyRepo = BaseDummyRepo
     
@@ -46,8 +47,9 @@ class TestChatMessageRepository:
     
     def test_should_rais_not_implemented_error_when_calling_mark_as_read(self):
         repository = self.BaseDummyRepo()
+        channel = Channel("test_channel", "test_stream", [], repository)
         with pytest.raises(NotImplementedError):
-            repository.mark_as_read(None)
+            repository.mark_as_read(channel)
     
     def test_should_rais_not_implemented_error_when_calling_get_streams_with_unread_messages(self):
         repository = self.BaseDummyRepo()

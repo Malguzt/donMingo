@@ -1,4 +1,3 @@
-import pytest
 import os
 from unittest.mock import patch
 from infrastructure.config.arize_config import ArizeConfig

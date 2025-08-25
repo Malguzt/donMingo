@@ -1,8 +1,6 @@
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from infrastructure.repositories.zulip_chat_message_repository import ZulipChatMessageRepository
-from domain.entities.user import User
-from domain.entities.channel import Channel
 
 
 class TestZulipChatMessageRepository:

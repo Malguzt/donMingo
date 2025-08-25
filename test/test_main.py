@@ -1,7 +1,4 @@
 import pytest
-import sys
-import subprocess
-import importlib.util
 from unittest.mock import Mock, patch
 from main import main
 

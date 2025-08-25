@@ -1,5 +1,5 @@
 class User:
-    def __init__(self, platform_id: int, platform: str, name: str = ""):
+    def __init__(self, platform_id: str, platform: str, name: str = ""):
         if not platform_id:
             raise ValueError("Platform ID is required")
         if not platform:

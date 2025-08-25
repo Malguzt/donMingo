@@ -1,5 +1,4 @@
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from infrastructure.transformers_engine.models_handler import ModelsHandler
 
 

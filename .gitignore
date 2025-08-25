@@ -214,3 +214,4 @@ lcov.info
 .trunk/configs/.isort.cfg
 .trunk/configs/.markdownlint.yaml
 .trunk/configs/ruff.toml
+pyproject.toml

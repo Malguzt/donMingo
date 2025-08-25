@@ -1,7 +1,5 @@
-import pytest
 from unittest.mock import Mock, patch
 from infrastructure.repositories.local_guanacos_repository import LocalGuanacosRepository
-from domain.entities.guanaco.guanaco import Guanaco
 
 
 class TestLocalGuanacosRepository:

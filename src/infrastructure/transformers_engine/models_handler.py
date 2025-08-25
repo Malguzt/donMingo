@@ -64,7 +64,7 @@ class ModelsHandler:
             pad_token_id = (
                 self._tokenizer.pad_token_id if self._tokenizer.pad_token_id is not None else self._tokenizer.eos_token_id
             )
-            print(f"[DEBUG] Starting generation...")
+            print("[DEBUG] Starting generation...")
             with torch.no_grad():
                 outputs = model.generate(
                     **inputs,

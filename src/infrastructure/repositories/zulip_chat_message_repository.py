@@ -4,10 +4,8 @@ from domain.entities.chat_message import ChatMessage
 from typing import List, Dict
 import zulip
 from infrastructure.config.zulip_config import ZulipConfig
-from datetime import datetime
 from typing import Optional
 from infrastructure.repositories.mappers.zulip_mapper import ZulipMapper
-import json
 from domain.entities.channel import Channel
 
 class ZulipChatMessageRepository(ChatMessageRepository):
@@ -35,9 +33,9 @@ class ZulipChatMessageRepository(ChatMessageRepository):
                 # Add the corresponding ChatMessage to the channel
                 if i < len(messages):
                     channels[stream_id].add_message(messages[i])
-        
+
         return channels
-    
+
     def get_messages_from_channel(self, channel: Channel) -> List[ChatMessage]:
         messages = self.client.get_messages({
             "anchor": "newest",
@@ -86,9 +84,11 @@ class ZulipChatMessageRepository(ChatMessageRepository):
         return [self.mapper.to_chat_message(msg) for msg in messages]
     
     def send_private_message(self, message: str, user: User):
-        recipient_user_id = self._find_user_id_by_email(user.email)
+        if user.platform != "zulip":
+            raise ValueError(f"User {user.platform_id} is not a Zulip user")
+        recipient_user_id = self._find_user_id_by_email(user.platform_id)
         if recipient_user_id is None:
-            raise ValueError(f"Recipient not found in Zulip realm for email: {user.email}")
+            raise ValueError(f"Recipient not found in Zulip realm for email: {user.platform_id}")
 
         request = {
             "type": "private",
@@ -122,7 +122,7 @@ class ZulipChatMessageRepository(ChatMessageRepository):
             raise RuntimeError(f"Zulip API error: {response.get('msg')}")
 
     def mark_as_read(self, channel: Channel):
-        response = self.client.mark_stream_as_read(channel.get_id())
+        response = self.client.mark_topic_as_read(channel.get_id(), channel.get_topic())
         if response.get("result") != "success":
             raise RuntimeError(f"Zulip API error: {response.get('msg')}")
 

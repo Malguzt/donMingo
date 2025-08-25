@@ -5,9 +5,7 @@ Follows Clean Architecture principles by orchestrating domain entities through r
 """
 
 import time
-import threading
 import signal
-import sys
 from typing import List, Dict
 from domain.ports.guanacos_repository import GuanacosRepository
 from infrastructure.workers.guanaco_worker import GuanacoWorker

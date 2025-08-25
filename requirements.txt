@@ -16,3 +16,6 @@ pytest-xdist
 pytest-mock
 pytest-asyncio
 pytest-timeout
+pytest-sugar
+pyright
+ruff

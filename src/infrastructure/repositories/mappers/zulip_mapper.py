@@ -1,6 +1,5 @@
 from domain.entities.chat_message import ChatMessage
 from domain.entities.user import User
-import json
 from datetime import datetime
 
 class ZulipMapper:
