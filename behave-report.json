@@ -1,0 +1,120 @@
+[
+{
+  "description": [
+    "The Guanaco project integrates with Zulip to enhance communication and collaboration.",
+    "For this, the system works in a loop getting unread messages, processing them, and sending responses.",
+    "Test must run with the timout of 30 seconds, because the system run in a infinite loop."
+  ],
+  "elements": [
+    {
+      "keyword": "Scenario",
+      "location": "features/responde_zulip.feature:7",
+      "name": "Response unread topics from Zulip",
+      "status": "error",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/responde_zulip.feature:8",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:5"
+          },
+          "name": "the Zulip API is accessible",
+          "result": {
+            "duration": 0.00016021728515625,
+            "status": "pending"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:9",
+          "name": "the mocked Zulip server is running",
+          "step_type": "given"
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:10",
+          "name": "the mocked responses a list of 3 unread topic",
+          "step_type": "given",
+          "table": {
+            "headings": [
+              "topic_id",
+              "topic_name",
+              "unread_count"
+            ],
+            "rows": [
+              [
+                "1",
+                "\"Test Topic\"",
+                "5"
+              ],
+              [
+                "2",
+                "\"Another Topic\"",
+                "3"
+              ],
+              [
+                "3",
+                "\"Third Topic\"",
+                "8"
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "When",
+          "location": "features/responde_zulip.feature:15",
+          "name": "the system processes each unread topic",
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/responde_zulip.feature:16",
+          "name": "it should send a response to each topic",
+          "step_type": "then",
+          "table": {
+            "headings": [
+              "topic_id",
+              "response_message"
+            ],
+            "rows": [
+              [
+                "1",
+                "\"Response to Test Topic\""
+              ],
+              [
+                "2",
+                "\"Response to Another Topic\""
+              ],
+              [
+                "3",
+                "\"Response to Third Topic\""
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "When",
+          "location": "features/responde_zulip.feature:21",
+          "name": "the system marks topics as read",
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/responde_zulip.feature:22",
+          "name": "it should confirm that all topics are marked as read",
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    }
+  ],
+  "keyword": "Feature",
+  "location": "features/responde_zulip.feature:1",
+  "name": "Responde Zulip Integration",
+  "status": "error",
+  "tags": []
+}
+]

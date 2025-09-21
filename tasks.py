@@ -1,6 +1,9 @@
 import json
 import os
-from invoke import task, Context, run
+from invoke import run
+from invoke.tasks import task
+from invoke.context import Context
+from invoke.runners import Result
 import sys
 
 project_folder = os.path.dirname(os.path.abspath(__file__))
@@ -79,12 +82,15 @@ def functional_test(ctx: Context) -> None:
             f"source {env_path} && "
             "behave features/ -f json.pretty -o behave-report.json -f pretty "
         )
-        console_response = run(
+        console_response: Result | None = ctx.run(
             behave_cmd,
             pty=True,
             warn=True,
             hide=True  # Hide output to capture it explicitly
         )
+        if console_response is None:
+            print("Error: Failed to run functional tests.")
+            sys.exit(1)
         print("Behave command output:")
         print(console_response.stdout)
         print("Behave command errors:")
@@ -155,8 +161,11 @@ def arch_test(ctx: Context) -> None:
     """Run architecture tests."""
     run("clear")
     # Use a separate pytest config for architecture tests (no coverage threshold)
-    console_response = ctx.run(f"source {env_path} && pytest -c pytest.arch.ini -n auto --maxfail=1 --durations=2 --timeout=10 tests/arch_tests", pty=True, warn=True, hide=True)
-
+    console_response: Result | None = ctx.run(f"source {env_path} && pytest -c pytest.arch.ini -n auto --maxfail=1 --durations=2 --timeout=10 tests/arch_tests", pty=True, warn=True, hide=True)
+    if console_response is None:
+        print("Error: Failed to run architecture tests.")
+        sys.exit(1)
+    
     print(console_response.stdout)
     if not console_response.ok:
         next_steps_prompt = "\n Start making an conseptual a theorical DDD, clean architecture and ports and adapters sumary of the errors showed by the tests."
@@ -177,8 +186,11 @@ def check_lint(ctx: Context) -> None:
     run("clear")
     print("Checking code linting with flake8...")
     lint_cmd = f"source {env_path} && flake8 src tests"
-    console_response = ctx.run(lint_cmd, pty=True, warn=True, hide=True)
-
+    console_response: Result | None = ctx.run(lint_cmd, pty=True, warn=True, hide=True)
+    if console_response is None:
+        print("Error: Failed to run linting checks.")
+        sys.exit(1)
+        
     if not console_response.ok:
         print("\n[FLAKE8 RESULT] FAIL: Linting issues detected.\n")
         print(console_response.stdout)

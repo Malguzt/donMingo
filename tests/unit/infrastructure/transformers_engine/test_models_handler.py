@@ -37,8 +37,6 @@ class TestModelsHandler:
         mock_torch.cuda.device_count.return_value = 0
         mock_os.cpu_count.return_value = None  # This should default to 1
         
-        handler = ModelsHandler()
-        
         # Should handle None cpu_count gracefully
         mock_os.cpu_count.assert_called()
 
@@ -170,7 +168,7 @@ class TestModelsHandler:
         mock_model.generate.assert_called_once()
         call_kwargs = mock_model.generate.call_args[1]
         assert call_kwargs["max_new_tokens"] == 32  # Updated value
-        assert call_kwargs["do_sample"] == False
+        assert call_kwargs["do_sample"] is False
         assert call_kwargs["pad_token_id"] == 1234
         # No longer expecting top_p and temperature
         
@@ -211,14 +209,16 @@ class TestModelsHandler:
         call_kwargs = mock_model.generate.call_args[1]
         assert call_kwargs["pad_token_id"] == 5678
         assert call_kwargs["max_new_tokens"] == 32
-        assert call_kwargs["do_sample"] == False
+        assert call_kwargs["do_sample"] is False
         assert result == "Generated text"
 
     @patch('infrastructure.transformers_engine.models_handler.AutoTokenizer')
     @patch('infrastructure.transformers_engine.models_handler.AutoModelForCausalLM')
     @patch('infrastructure.transformers_engine.models_handler.torch')
     @patch('infrastructure.transformers_engine.models_handler.os')
-    def test_should_reuse_model_and_tokenizer_on_subsequent_calls(self, mock_os, mock_torch, mock_auto_model, mock_auto_tokenizer):
+    def test_should_reuse_model_and_tokenizer_on_subsequent_calls(
+        self, mock_os, mock_torch, mock_auto_model, mock_auto_tokenizer
+    ):
         # Setup mocks
         mock_torch.cuda.is_available.return_value = False
         mock_torch.no_grad.return_value.__enter__ = Mock()
@@ -282,7 +282,9 @@ class TestModelsHandler:
     @patch('infrastructure.transformers_engine.models_handler.AutoModelForCausalLM')
     @patch('infrastructure.transformers_engine.models_handler.torch')
     @patch('infrastructure.transformers_engine.models_handler.os')
-    def test_should_handle_cpu_device_placement_in_generate_text(self, mock_os, mock_torch, mock_auto_model, mock_auto_tokenizer):
+    def test_should_handle_cpu_device_placement_in_generate_text(
+        self, mock_os, mock_torch, mock_auto_model, mock_auto_tokenizer
+    ):
         # Setup mocks - only CPU available
         mock_torch.cuda.is_available.return_value = False
         mock_torch.backends.mps.is_available.return_value = False

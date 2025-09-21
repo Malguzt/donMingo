@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from src.domain.ports.guanacos_repository import GuanacosRepository
 from src.application.use_cases.guanacos_spits import GuanacosSpits
 
+
 class TestGuanacoSpits:
     def test_should_start_workers_for_each_guanaco(self):
         guanacos_repository = Mock(spec=GuanacosRepository)

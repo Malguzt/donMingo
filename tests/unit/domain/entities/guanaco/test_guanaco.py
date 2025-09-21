@@ -23,7 +23,7 @@ class TestGuanaco:
     def test_should_raise_a_missing_repository_error_when_try_to_work_without_a_think_repository(self):
         mock_chat_repo = Mock()
         guanaco = Guanaco(
-            user=User(platform_id="1", platform="telegram", name="John Doe"), 
+            user=User(platform_id="1", platform="telegram", name="John Doe"),
             chat_message_repository=mock_chat_repo
         )
 

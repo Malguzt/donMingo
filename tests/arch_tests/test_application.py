@@ -1,4 +1,4 @@
-from tests.arch_tests.base_arch_test import BaseArchTest
+from .base_arch_test import BaseArchTest
 from pytestarch import Rule
 import pytest
 

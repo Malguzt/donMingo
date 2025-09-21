@@ -122,7 +122,7 @@ class ZulipChatMessageRepository(ChatMessageRepository):
             raise RuntimeError(f"Zulip API error: {response.get('msg')}")
 
     def mark_as_read(self, channel: Channel):
-        response = self.client.mark_topic_as_read(channel.get_id(), channel.get_topic())
+        response = self.client.mark_topic_as_read(int(channel.get_id()), channel.get_topic())
         if response.get("result") != "success":
             raise RuntimeError(f"Zulip API error: {response.get('msg')}")
 
