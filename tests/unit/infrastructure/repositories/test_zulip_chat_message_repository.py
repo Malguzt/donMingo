@@ -5,7 +5,7 @@ from infrastructure.repositories.zulip_chat_message_repository import ZulipChatM
 
 class TestZulipChatMessageRepository:
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_initialize_with_zulip_client_and_mapper(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -25,19 +25,13 @@ class TestZulipChatMessageRepository:
         
         # Should create config, client, and mapper
         mock_config.assert_called_once()
-        mock_client.assert_called_once_with(
-            email="test@example.com",
-            api_key="test_api_key",
-            site="test.zulipchat.com"
-        )
         mock_mapper.assert_called_once()
         
         assert repository.config == mock_config
-        assert repository.client == mock_client
         assert repository.mapper == mock_mapper
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_get_unread_messages_successfully(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -47,14 +41,15 @@ class TestZulipChatMessageRepository:
         mock_mapper = mock_mapper.return_value
         
         # Mock API response
-        api_response = {
+        mock_response = Mock()
+        mock_response.json.return_value = {
             "result": "success",
             "messages": [
                 {"id": 1, "content": "Hello"},
                 {"id": 2, "content": "World"}
             ]
         }
-        mock_client.get_messages.return_value = api_response
+        mock_client.get.return_value = mock_response
         
         # Mock mapper responses
         mock_message1 = Mock()
@@ -85,10 +80,10 @@ class TestZulipChatMessageRepository:
         assert result == [mock_message1, mock_message2]
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_raise_error_on_api_failure_for_unread_messages(
-        self, mock_config, mock_client, mock_mapper):
+            self, mock_config, mock_client, mock_mapper):
         # Setup mocks
         self._setup_basic_mocks(mock_config, mock_client, mock_mapper)
         
@@ -107,7 +102,7 @@ class TestZulipChatMessageRepository:
             repository.get_unread_messages()
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_get_messages_from_channel(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -154,7 +149,7 @@ class TestZulipChatMessageRepository:
         assert result == [mock_message]
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_send_private_message_successfully(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -195,7 +190,7 @@ class TestZulipChatMessageRepository:
         mock_client.send_message.assert_called_once_with(expected_request)
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_raise_error_when_user_not_found_for_private_message(
         self, mock_config, mock_client, mock_mapper):
@@ -222,7 +217,7 @@ class TestZulipChatMessageRepository:
             repository.send_private_message("Hello!", user)
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_send_channel_message_successfully(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -247,7 +242,7 @@ class TestZulipChatMessageRepository:
         mock_client.send_message.assert_called_once_with(expected_request)
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_send_thread_message_successfully(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -272,7 +267,7 @@ class TestZulipChatMessageRepository:
         mock_client.send_message.assert_called_once_with(expected_request)
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_mark_channel_as_read(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -295,7 +290,7 @@ class TestZulipChatMessageRepository:
         mock_client.mark_stream_as_read.assert_called_once_with("42")
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_raise_error_on_mark_as_read_failure(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -316,10 +311,10 @@ class TestZulipChatMessageRepository:
             repository.mark_as_read(mock_channel)
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_find_user_id_by_email_with_user_id_field(
-        self, mock_config, mock_client, mock_mapper):
+            self, mock_config, mock_client, mock_mapper):
         # Setup mocks
         self._setup_basic_mocks(mock_config, mock_client, mock_mapper)
         
@@ -340,7 +335,7 @@ class TestZulipChatMessageRepository:
         assert result == 42
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_find_user_id_by_email_with_id_field(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -363,7 +358,7 @@ class TestZulipChatMessageRepository:
         assert result == 123
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_return_none_when_user_not_found(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -386,7 +381,7 @@ class TestZulipChatMessageRepository:
         assert result is None
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_raise_error_on_get_users_failure(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -408,11 +403,10 @@ class TestZulipChatMessageRepository:
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.Channel')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_get_streams_with_unread_messages(
-        self, mock_config, mock_client, mock_mapper, mock_channel_class
-    ):
+            self, mock_config, mock_client, mock_mapper, mock_channel_class):
         # Setup mocks
         self._setup_basic_mocks(mock_config, mock_client, mock_mapper)
         
@@ -477,7 +471,7 @@ class TestZulipChatMessageRepository:
             assert result["43"] == mock_channel2
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_raise_error_on_send_private_message_failure(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -502,7 +496,7 @@ class TestZulipChatMessageRepository:
             repository.send_private_message("Hello!", user)
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_raise_error_on_send_channel_message_failure(self, mock_config, mock_client, mock_mapper):
         # Setup mocks
@@ -520,7 +514,7 @@ class TestZulipChatMessageRepository:
             repository.send_channel_message("Hello!", "nonexistent", "Topic")
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
-    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_raise_error_on_send_thread_message_failure(self, mock_config, mock_client, mock_mapper):
         # Setup mocks

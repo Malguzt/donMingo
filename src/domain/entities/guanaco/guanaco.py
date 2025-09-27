@@ -1,7 +1,7 @@
 from domain.entities.user import User
 from domain.errors import MissingRepositoryError, MissingUserError
-from ports.chat_message_repository import ChatMessageRepository
-from ports.think_repository import ThinkRepository
+from domain.ports.chat_message_repository import ChatMessageRepository
+from domain.ports.think_repository import ThinkRepository
 
 
 class Guanaco:
@@ -18,6 +18,7 @@ class Guanaco:
         self.think_repository = think_repository
 
     def work(self):
+        print("[DEBUG] Guanaco.work() called")
         """Process unread messages once. Returns True if work was performed, False otherwise."""
         if self.user is None:
             raise MissingUserError("Cannot work without a user")
@@ -35,6 +36,8 @@ class Guanaco:
 
         for channel in channels.values():
             print(f"Channel: {channel}")
+            print(f"[DEBUG] channel.get_last_message().sender: {channel.get_last_message().sender}")
+            print(f"[DEBUG] self.user: {self.user}")
             if channel.get_last_message().sender != self.user:
                 channel.respond(
                     self.think_repository.get_think(channel.get_last_message().content)

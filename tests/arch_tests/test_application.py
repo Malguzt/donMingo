@@ -9,7 +9,7 @@ class TestApplication(BaseArchTest):
     def test_application_should_not_import_inbound_adapters(self):
         """
         Test that application services do not import inbound adapters.
-        
+
         This enforces proper dependency direction in Clean Architecture.
         """
         if self._is_empty_package(f"{self.ROOT}.application"):
@@ -20,8 +20,7 @@ class TestApplication(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.application") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.adapters\.inbound(\..+)?"
-                )\
+                    rf"{self.ROOT}\.adapters\.inbound(\..+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -53,7 +52,7 @@ class TestApplication(BaseArchTest):
     def test_application_should_not_import_outbound_adapters(self):
         """
         Test that application services do not import outbound adapters directly.
-        
+
         Application should depend on abstractions, not concrete adapters.
         """
         if self._is_empty_package(f"{self.ROOT}.application"):
@@ -64,8 +63,7 @@ class TestApplication(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.application") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.adapters\.outbound(\..+)?"
-                )\
+                    rf"{self.ROOT}\.adapters\.outbound(\..+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -97,7 +95,7 @@ class TestApplication(BaseArchTest):
     def test_application_should_not_import_infrastructure(self):
         """
         Test that application services do not import infrastructure modules.
-        
+
         Infrastructure is the outermost layer and should not be imported by application.
         """
         if self._is_empty_package(f"{self.ROOT}.application"):
@@ -108,8 +106,7 @@ class TestApplication(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.application") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.infrastructure(\..+)?"
-                )\
+                    rf"{self.ROOT}\.infrastructure(\..+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -133,7 +130,7 @@ class TestApplication(BaseArchTest):
                 f"🛠️  Recommended approach:\n"
                 f"   • Create IRepository, IEmailService, ILogger interfaces\n"
                 f"   • Implement these in infrastructure layer\n"
-                f"   • Use dependency injection frameworks\n"
+                f"   • Use constructor injection in inbound adapters\n"
                 f"   • Consider using factory patterns for complex setups\n\n"
                 f"Original error: {str(e)}"
             )

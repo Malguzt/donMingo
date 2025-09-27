@@ -3,6 +3,7 @@ from src.domain.ports.chat_message_repository import ChatMessageRepository
 from src.domain.entities.user import User
 from src.domain.entities.channel import Channel
 
+
 class TestChatMessageRepository:
     @classmethod
     def setup_class(cls):
@@ -10,14 +11,19 @@ class TestChatMessageRepository:
         class BaseDummyRepo(ChatMessageRepository):
             def get_unread_messages(self, user: User):
                 raise NotImplementedError()
+
             def send_private_message(self, message: str, user: User):
                 raise NotImplementedError()
+
             def send_channel_message(self, message: str, channel_id: str, topic: str):
                 raise NotImplementedError()
+
             def send_thread_message(self, message: str, thread_id: str, topic: str):
                 raise NotImplementedError()
+
             def mark_as_read(self, channel: Channel):
                 raise NotImplementedError()
+
             def get_streams_with_unread_messages(self):
                 raise NotImplementedError()
         

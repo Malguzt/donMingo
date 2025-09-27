@@ -5,9 +5,17 @@ from infrastructure.config.zulip_config import ZulipConfig
 
 
 class TestZulipConfig:
-    THRE_VAIALBLES_MISSING = "Missing required environment variables: ZULIP_API_KEY, ZULIP_EMAIL, ZULIP_SITE"
-    EMAIL_SITE_MISSING = "Missing required environment variables: ZULIP_EMAIL, ZULIP_SITE"
-    APIKEY_SITE_MISSING = "Missing required environment variables: ZULIP_SITE"
+    THRE_VAIALBLES_MISSING = (
+        "Missing required environment variables: ZULIP_API_KEY, ZULIP_EMAIL, ZULIP_API_URL or ZULIP_SITE"
+    )
+    EMAIL_SITE_MISSING = (
+        "Missing required environment variables: ZULIP_EMAIL, ZULIP_API_URL or ZULIP_SITE. "
+        "Create a .env or set them in the environment."
+    )
+    APIKEY_SITE_MISSING = (
+        "Missing required environment variables: ZULIP_API_URL or ZULIP_SITE. "
+        "Create a .env or set them in the environment."
+    )
     APIKEY_APIKEY_MISSING = "Missing required environment variables: ZULIP_API_KEY"
 
     @patch.dict(os.environ, {

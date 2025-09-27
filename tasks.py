@@ -15,7 +15,7 @@ prompt_init += "\n If you are an AI based coding assitant, take in account this 
 @task
 def unit_test(ctx: Context) -> None:
     """Run unit tests with coverage. Detects error, fail, or low total coverage."""
-    run("clear")
+    ctx.run("clear")
     # Clean up any old coverage data files before running tests
     os.system("source {} && coverage erase".format(env_path))
     # Run tests in parallel with pytest and use pytest.unit.ini config
@@ -69,13 +69,13 @@ def unit_test(ctx: Context) -> None:
 @task
 def functional_test(ctx: Context) -> None:
     """Run functional tests using pytest-bdd. Try to run the features in ./features/ folder."""
-    run("clear")
+    ctx.run("clear")
     # Ensure .cov directory exists for coverage files
     if not os.path.exists(".cov"):
         os.makedirs(".cov")
     print("Running functional tests...")
     if not os.path.exists("./features/steps"):
-        run("mkdir ./features/steps")
+        ctx.run("mkdir ./features/steps")
 
     try:
         behave_cmd = (
@@ -84,6 +84,7 @@ def functional_test(ctx: Context) -> None:
         )
         console_response: Result | None = ctx.run(
             behave_cmd,
+            env={"PYTHONPATH": "src"},
             pty=True,
             warn=True,
             hide=True  # Hide output to capture it explicitly
@@ -125,6 +126,7 @@ def functional_test(ctx: Context) -> None:
     if total_undefined > 0:
         next_steps_prompt = "\n Try to create the glue code in the ./features/steps folder to the missing steps."
         next_steps_prompt += "\n Take in account that external services must be mocked using FastAPI."
+        next_steps_prompt += "\n The mocked servers files must be in the ./features/steps/mocks folder."
         next_steps_prompt += "\n The functional test must load the full appliction before start, and turn it down at the end."
         next_steps_prompt += "\n Try to keep a organized structure of files and folders into the ./features/steps folder."
         next_steps_prompt += "\n If you found similar or equivalents sentences but not equals, you can use the same glue code, if they reprecent the same condigions puting more tan on given, when or then decorator."
@@ -148,6 +150,8 @@ def functional_test(ctx: Context) -> None:
     
     
     if not console_response.ok:
+        next_steps_prompt += "\n The feature files is fully responsability of the business analyst, is not your responsability to modify them."
+        next_steps_prompt += "\n You never must modify the feature files, only the steps implementation and the code under test."
         next_steps_prompt += "\n Remove any deprecated code."
         next_steps_prompt += "\n Refactor all lint and type error."
         next_steps_prompt += "\n To remove obsolet files run the 'rm' command."
@@ -159,7 +163,7 @@ def functional_test(ctx: Context) -> None:
 @task
 def arch_test(ctx: Context) -> None:
     """Run architecture tests."""
-    run("clear")
+    ctx.run("clear")
     # Use a separate pytest config for architecture tests (no coverage threshold)
     console_response: Result | None = ctx.run(f"source {env_path} && pytest -c pytest.arch.ini -n auto --maxfail=1 --durations=2 --timeout=10 tests/arch_tests", pty=True, warn=True, hide=True)
     if console_response is None:
@@ -183,7 +187,7 @@ def arch_test(ctx: Context) -> None:
 @task
 def check_lint(ctx: Context) -> None:
     """Check code linting with flake8."""
-    run("clear")
+    ctx.run("clear")
     print("Checking code linting with flake8...")
     lint_cmd = f"source {env_path} && flake8 src tests"
     console_response: Result | None = ctx.run(lint_cmd, pty=True, warn=True, hide=True)
@@ -209,3 +213,10 @@ def build(ctx: Context) -> None:
     unit_test(ctx)
     check_lint(ctx)
     print("\n All test passed correctly, you just be sure that you don't forget to clean deprecated files now.")
+
+@task
+def run(ctx: Context) -> None:
+    """Run the main application."""
+    ctx.run("clear")
+    print("Running the main application...")
+    ctx.run(f"source {env_path} && python src/main.py", pty=True)

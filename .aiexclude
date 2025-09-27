@@ -1,0 +1,3 @@
+*.feature
+tests/arch_tests
+tasks.py

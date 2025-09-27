@@ -2,6 +2,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import os
 import torch
 
+
 class ModelsHandler:
     def __init__(self):
         self.models = ["Qwen/Qwen3-1.7B"]
@@ -21,8 +22,6 @@ class ModelsHandler:
         print(f"Availables xpu: {has_xpu}")
         print(f"Availables amd_rocm: {has_rocm}")
 
-
-
     def get_model(self, model_name: str) -> AutoModelForCausalLM:
         if self._model is None:
             try:
@@ -37,7 +36,7 @@ class ModelsHandler:
                     self._model.to("xpu")
             self._model.eval()
         return self._model
-    
+
     def generate_text(self, prompt: str) -> str:
         try:
             print(f"[DEBUG] Generating text for prompt: {prompt}")
@@ -45,24 +44,25 @@ class ModelsHandler:
             model = self.get_model(model_id)
             if self._tokenizer is None:
                 self._tokenizer = AutoTokenizer.from_pretrained(model_id)
-            
+
             # Clean HTML tags from prompt if present
             import re
             clean_prompt = re.sub(r'<[^>]+>', '', prompt).strip()
             if not clean_prompt:
                 clean_prompt = "Hello"
-            
+
             print(f"[DEBUG] Clean prompt: {clean_prompt}")
             inputs = self._tokenizer(clean_prompt, return_tensors="pt", max_length=512, truncation=True)
             device = (
                 "cuda" if torch.cuda.is_available() else
                 ("mps" if hasattr(torch.backends, "mps") and torch.backends.mps.is_available() else
-                 ("xpu" if hasattr(torch, "xpu") and hasattr(torch.xpu, "is_available") and torch.xpu.is_available() else "cpu"))
+                 ("xpu" if hasattr(torch, "xpu") and torch.xpu.is_available() else "cpu"))
             )
             if device != "cpu":
                 inputs = {k: v.to(device) for k, v in inputs.items()}
             pad_token_id = (
-                self._tokenizer.pad_token_id if self._tokenizer.pad_token_id is not None else self._tokenizer.eos_token_id
+                self._tokenizer.pad_token_id if self._tokenizer.pad_token_id is not None
+                else self._tokenizer.eos_token_id
             )
             print("[DEBUG] Starting generation...")
             with torch.no_grad():

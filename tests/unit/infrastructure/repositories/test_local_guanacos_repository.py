@@ -7,7 +7,9 @@ class TestLocalGuanacosRepository:
     @patch('infrastructure.repositories.local_guanacos_repository.ZulipChatMessageRepository')
     @patch('infrastructure.repositories.local_guanacos_repository.User')
     @patch('infrastructure.repositories.local_guanacos_repository.Guanaco')
-    def test_should_return_list_of_guanacos_with_mocked_dependencies(self, mock_guanaco_class, mock_user_class, mock_zulip_repo_class, mock_transformers_repo_class):
+    def test_should_return_list_of_guanacos_with_mocked_dependencies(
+        self, mock_guanaco_class, mock_user_class, mock_zulip_repo_class, mock_transformers_repo_class
+    ):
         # Setup mocks
         mock_user = Mock()
         mock_user_class.return_value = mock_user

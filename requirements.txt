@@ -19,3 +19,6 @@ pytest-timeout
 pytest-sugar
 pyright
 ruff
+uvicorn
+fastapi
+requests

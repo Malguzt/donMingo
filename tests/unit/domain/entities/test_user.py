@@ -1,6 +1,7 @@
 from domain.entities.user import User
 import pytest
 
+
 class TestUser:    
     def test_should_fail_when_creating_a_user_with_empty_platform_id(self):
         with pytest.raises(ValueError):

@@ -9,7 +9,7 @@ class TestLayers(BaseArchTest):
     def test_domain_layer_has_no_outward_dependencies(self):
         """
         Test that domain layer does not import from outer layers.
-        
+
         Domain is the innermost layer and should have no outward dependencies.
         """
         if self._is_empty_package(f"{self.ROOT}.domain"):
@@ -20,8 +20,7 @@ class TestLayers(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.domain") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.(application|adapters(\.inbound|\.outbound)?|infrastructure)(\..+)?"
-                ) \
+                    rf"{self.ROOT}\.(application|adapters(\.inbound|\.outbound)?|infrastructure)(\..+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -53,7 +52,7 @@ class TestLayers(BaseArchTest):
     def test_application_layer_only_depends_on_domain(self):
         """
         Test that application layer only imports from domain layer.
-        
+
         Application orchestrates domain logic without depending on outer layers.
         """
         if self._is_empty_package(f"{self.ROOT}.application"):
@@ -64,8 +63,7 @@ class TestLayers(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.application") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.(adapters(\.inbound|\.outbound)?|infrastructure)(\..+)?"
-                ) \
+                    rf"{self.ROOT}\.(adapters(\.inbound|\.outbound)?|infrastructure)(\..+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -97,7 +95,7 @@ class TestLayers(BaseArchTest):
     def test_inbound_adapters_should_not_access_domain_directly(self):
         """
         Test that inbound adapters do not import domain layer directly.
-        
+
         Inbound adapters should go through the application layer.
         """
         if self._is_empty_package(f"{self.ROOT}.adapters.inbound"):
@@ -139,7 +137,7 @@ class TestLayers(BaseArchTest):
     def test_outbound_adapters_should_not_access_application_layer(self):
         """
         Test that outbound adapters do not import application layer.
-        
+
         Outbound adapters should implement domain interfaces without application dependencies.
         """
         if self._is_empty_package(f"{self.ROOT}.adapters.outbound"):
@@ -181,7 +179,7 @@ class TestLayers(BaseArchTest):
     def test_infrastructure_layer_should_not_import_core_layers(self):
         """
         Test that infrastructure layer does not import domain or application layers.
-        
+
         Infrastructure should be the outermost layer with minimal inward dependencies.
         """
         if self._is_empty_package(f"{self.ROOT}.infrastructure"):
@@ -192,8 +190,7 @@ class TestLayers(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.infrastructure") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.(domain|application|adapters\.inbound)(\..+)?"
-                ) \
+                    rf"{self.ROOT}\.(domain|application|adapters\.inbound)(\..+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(

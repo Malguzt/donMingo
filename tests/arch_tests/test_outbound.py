@@ -9,7 +9,7 @@ class TestOutbound(BaseArchTest):
     def test_outbound_repositories_must_implement_domain_ports(self):
         """
         Test that repository adapters implement domain port interfaces.
-        
+
         Repositories provide data persistence according to domain contracts.
         """
         repositories_module = f"{self.ROOT}.adapters.outbound.repositories"
@@ -52,21 +52,20 @@ class TestOutbound(BaseArchTest):
     def test_outbound_repositories_should_only_import_domain_layer(self):
         """
         Test that repositories only import from domain layer.
-        
+
         Repositories should implement domain contracts without application dependencies.
         """
         repositories_module = f"{self.ROOT}.adapters.outbound.repositories"
         if self._is_empty_package(repositories_module):
             pytest.skip("Outbound repositories package is empty - skipping test")
-            
+
         ev = self._evaluable()
-        
+
         try:
             Rule().modules_that().are_sub_modules_of(repositories_module) \
                 .should_not().import_modules_except_modules_that().have_name_matching(
                     rf"({self.ROOT}\.domain(\..+)?|{self.ROOT}\.adapters\.outbound\.repositories(\..+)?)"
-                ) \
-                .assert_applies(ev)
+            ).assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 REPOSITORY INAPPROPRIATE DEPENDENCY VIOLATION\n"
@@ -97,15 +96,15 @@ class TestOutbound(BaseArchTest):
     def test_outbound_gateways_should_not_import_application_layer(self):
         """
         Test that gateway adapters do not import application layer.
-        
+
         Gateways should implement domain contracts for external service access.
         """
         gateways_module = f"{self.ROOT}.adapters.outbound.gateways"
         if self._is_empty_package(gateways_module):
             pytest.skip("Outbound gateways package is empty - skipping test")
-            
+
         ev = self._evaluable()
-        
+
         try:
             Rule().modules_that().are_sub_modules_of(gateways_module) \
                 .should_not().import_modules_that().are_sub_modules_of(f"{self.ROOT}.application") \
@@ -140,21 +139,20 @@ class TestOutbound(BaseArchTest):
     def test_outbound_gateways_should_only_import_domain_layer(self):
         """
         Test that gateways only import from domain layer.
-        
+
         Gateways should implement domain contracts without other layer dependencies.
         """
         gateways_module = f"{self.ROOT}.adapters.outbound.gateways"
         if self._is_empty_package(gateways_module):
             pytest.skip("Outbound gateways package is empty - skipping test")
-            
+
         ev = self._evaluable()
-        
+
         try:
             Rule().modules_that().are_sub_modules_of(gateways_module) \
                 .should_not().import_modules_except_modules_that().have_name_matching(
                     rf"({self.ROOT}\.domain(\..+)?|{self.ROOT}\.adapters\.outbound\.gateways(\..+)?)"
-                ) \
-                .assert_applies(ev)
+            ).assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 GATEWAY INAPPROPRIATE DEPENDENCY VIOLATION\n"
@@ -167,7 +165,7 @@ class TestOutbound(BaseArchTest):
                 f"🔧 How to fix this:\n"
                 f"   1. Remove non-domain imports from gateway modules\n"
                 f"   2. Only import domain entities, value objects, and ports\n"
-                f"   3. Use dependency injection for infrastructure services\n"
+                f"   3. Use dependency injection for external dependencies\n"
                 f"   4. Keep gateways focused on external service integration\n\n"
                 f"💡 Gateway design principles:\n"
                 f"   • Implement domain-defined external service interfaces\n"
@@ -185,21 +183,20 @@ class TestOutbound(BaseArchTest):
     def test_outbound_cache_implementations_should_only_import_domain_layer(self):
         """
         Test that cache implementations only import from domain layer.
-        
+
         Cache adapters should implement domain caching contracts.
         """
         cache_module = f"{self.ROOT}.adapters.outbound.cache_impl"
         if self._is_empty_package(cache_module):
             pytest.skip("Outbound cache implementations package is empty - skipping test")
-            
+
         ev = self._evaluable()
-        
+
         try:
             Rule().modules_that().are_sub_modules_of(cache_module) \
                 .should_not().import_modules_except_modules_that().have_name_matching(
                     rf"({self.ROOT}\.domain(\..+)?|{self.ROOT}\.adapters\.outbound\.cache_impl(\..+)?)"
-                ) \
-                .assert_applies(ev)
+            ).assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 CACHE IMPLEMENTATION INAPPROPRIATE DEPENDENCY VIOLATION\n"
@@ -219,7 +216,7 @@ class TestOutbound(BaseArchTest):
                 f"   • Handle serialization/deserialization of domain objects\n"
                 f"   • Manage cache keys and expiration policies\n"
                 f"   • Provide cache invalidation strategies\n\n"
-                f"🛠️  Cache implementation strategies:\n"
+                f"🛠️  Implementation strategies:\n"
                 f"   • Define ICacheRepository in domain.ports\n"
                 f"   • Implement RedisCache, MemoryCache adapters\n"
                 f"   • Use decorator pattern for adding caching to repositories\n"
@@ -230,7 +227,7 @@ class TestOutbound(BaseArchTest):
     def test_outbound_adapters_should_not_import_inbound_adapters(self):
         """
         Test that outbound adapters do not import inbound adapters.
-        
+
         Outbound and inbound adapters serve different purposes and should be independent.
         """
         if self._is_empty_package(f"{self.ROOT}.adapters.outbound"):

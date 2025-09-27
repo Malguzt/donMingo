@@ -9,7 +9,7 @@ class TestInfrastructure(BaseArchTest):
     def test_infrastructure_should_not_import_domain_layer(self):
         """
         Test that infrastructure layer does not import domain layer directly.
-        
+
         Infrastructure should implement domain interfaces, not import domain directly.
         """
         if self._is_empty_package(f"{self.ROOT}.infrastructure"):
@@ -20,8 +20,8 @@ class TestInfrastructure(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.infrastructure") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.domain(\..+)?"
-                ).assert_applies(ev)
+                    rf"{self.ROOT}\.domain(\\..+)?") \
+                .assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 INFRASTRUCTURE → DOMAIN DIRECT IMPORT VIOLATION\n"
@@ -52,7 +52,7 @@ class TestInfrastructure(BaseArchTest):
     def test_infrastructure_should_not_import_application_layer(self):
         """
         Test that infrastructure layer does not import application layer.
-        
+
         Infrastructure should be independent of application orchestration logic.
         """
         if self._is_empty_package(f"{self.ROOT}.infrastructure"):
@@ -63,8 +63,8 @@ class TestInfrastructure(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.infrastructure") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.application(\..+)?"
-                ).assert_applies(ev)
+                    rf"{self.ROOT}\.application(\\..+)?") \
+                .assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 INFRASTRUCTURE → APPLICATION DEPENDENCY VIOLATION\n"
@@ -95,7 +95,7 @@ class TestInfrastructure(BaseArchTest):
     def test_infrastructure_should_not_import_inbound_adapters(self):
         """
         Test that infrastructure layer does not import inbound adapters.
-        
+
         Infrastructure should not depend on request handling mechanisms.
         """
         if self._is_empty_package(f"{self.ROOT}.infrastructure"):
@@ -106,8 +106,8 @@ class TestInfrastructure(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.infrastructure") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.adapters\.inbound(\..+)?"
-                ).assert_applies(ev)
+                    rf"{self.ROOT}\.adapters\.inbound(\\..+)?") \
+                .assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 INFRASTRUCTURE → INBOUND ADAPTER DEPENDENCY VIOLATION\n"
@@ -138,7 +138,7 @@ class TestInfrastructure(BaseArchTest):
     def test_infrastructure_orm_modules_should_not_import_core_layers(self):
         """
         Test that infrastructure ORM modules maintain proper boundaries.
-        
+
         ORM configurations should be independent of core business logic.
         """
         orm_module = f"{self.ROOT}.infrastructure.orm"
@@ -150,15 +150,15 @@ class TestInfrastructure(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(orm_module) \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.(domain|application|adapters\.inbound)(\..+)?"
-                ).assert_applies(ev)
+                    rf"{self.ROOT}\.(domain|application|adapters\.inbound)(\\..+)?") \
+                .assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 INFRASTRUCTURE ORM → CORE LAYERS VIOLATION\n"
                 f"❌ Why it failed: ORM modules are importing core layers inappropriately\n"
                 f"🏗️  Why this creates architectural problems:\n"
                 f"   • ORM is a database technology concern, not business logic\n"
-                f"   • Direct imports create tight coupling to domain structure\n"
+                f"   • Direct imports can create tight coupling to domain structure\n"
                 f"   • It makes database schema changes affect business logic\n"
                 f"   • Testing becomes harder with database-business logic coupling\n\n"
                 f"🔧 How to fix this:\n"
@@ -175,14 +175,14 @@ class TestInfrastructure(BaseArchTest):
                 f"   • Use SQLAlchemy models for database schema\n"
                 f"   • Create domain entities as pure Python classes\n"
                 f"   • Implement repository classes for data access\n"
-                f"   • Use factory patterns for object creation\n\n"
+                f"   • Use factory patterns for complex object creation\n\n"
                 f"Original error: {str(e)}"
             )
 
     def test_infrastructure_http_modules_should_not_import_core_layers(self):
         """
         Test that infrastructure HTTP modules maintain proper boundaries.
-        
+
         HTTP client configurations should be independent of business logic.
         """
         http_module = f"{self.ROOT}.infrastructure.http"
@@ -194,8 +194,8 @@ class TestInfrastructure(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(http_module) \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.(domain|application|adapters\.inbound)(\..+)?"
-                ).assert_applies(ev)
+                    rf"{self.ROOT}\.(domain|application|adapters\.inbound)(\\..+)?") \
+                .assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 INFRASTRUCTURE HTTP → CORE LAYERS VIOLATION\n"
@@ -226,7 +226,7 @@ class TestInfrastructure(BaseArchTest):
     def test_infrastructure_config_modules_should_not_import_core_layers(self):
         """
         Test that infrastructure configuration modules maintain proper boundaries.
-        
+
         Configuration should be technical concern, not business logic.
         """
         config_module = f"{self.ROOT}.infrastructure.config"
@@ -238,8 +238,9 @@ class TestInfrastructure(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(config_module) \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.(domain|application|adapters\.inbound)(\..+)?"
-                ).assert_applies(ev)
+                    rf"{self.ROOT}\.(domain|application|adapters\.inbound)(\\..+)?"
+            ) \
+                .assert_applies(ev)
         except Exception as e:
             pytest.fail(
                 f"\n💔 INFRASTRUCTURE CONFIG → CORE LAYERS VIOLATION\n"
@@ -258,11 +259,8 @@ class TestInfrastructure(BaseArchTest):
                 f"   • Configuration should be external to application logic\n"
                 f"   • Use environment variables for deployment-specific settings\n"
                 f"   • Create configuration classes for type safety\n"
-                f"   • Validate configuration at application startup\n\n"
-                f"🛠️  Implementation strategies:\n"
-                f"   • Use pydantic for configuration validation\n"
-                f"   • Create separate config classes for different environments\n"
-                f"   • Use factory pattern for creating configured objects\n"
+                f"   • Validate configuration at application startup\n"
+                f"   • Consider using factory pattern for creating configured objects\n"
                 f"   • Consider using configuration files for complex setups\n\n"
                 f"Original error: {str(e)}"
             )

@@ -5,11 +5,11 @@ import pytest
 
 class TestDomain(BaseArchTest):
     """Test domain layer architecture constraints following DDD principles."""
-    
+
     def test_entities_should_not_import_domain_services(self):
         """
         Test that entities do not import domain services.
-        
+
         Entities should be pure business objects without service dependencies.
         """
         if self._is_empty_package(f"{self.ROOT}.domain.entities"):
@@ -51,7 +51,7 @@ class TestDomain(BaseArchTest):
     def test_value_objects_should_not_import_domain_services(self):
         """
         Test that value objects do not import domain services.
-        
+
         Value objects should be immutable and self-contained.
         """
         if self._is_empty_package(f"{self.ROOT}.domain.value_objects"):
@@ -93,7 +93,7 @@ class TestDomain(BaseArchTest):
     def test_domain_services_should_not_import_application_layer(self):
         """
         Test that domain services do not import application layer modules.
-        
+
         Domain services should be pure business logic without application concerns.
         """
         if self._is_empty_package(f"{self.ROOT}.domain.services"):
@@ -104,8 +104,7 @@ class TestDomain(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.domain.services") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.application(\..+)?"
-                ) \
+                    rf"{self.ROOT}\.application(\. D+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -137,19 +136,18 @@ class TestDomain(BaseArchTest):
     def test_domain_services_should_not_import_adapters(self):
         """
         Test that domain services do not import adapter modules.
-        
+
         Domain should be independent of all infrastructure and adapter concerns.
         """
         if self._is_empty_package(f"{self.ROOT}.domain.services"):
             pytest.skip("Domain services package is empty - skipping test")
-            
+
         ev = self._evaluable()
-        
+
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.domain.services") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.adapters(\.inbound|\.outbound)?(\..+)?"
-                ) \
+                    rf"{self.ROOT}\.adapters(\.inbound|\.outbound)?(\. D+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -181,7 +179,7 @@ class TestDomain(BaseArchTest):
     def test_domain_services_should_not_import_infrastructure(self):
         """
         Test that domain services do not import infrastructure modules.
-        
+
         Domain must remain independent of all infrastructure concerns.
         """
         if self._is_empty_package(f"{self.ROOT}.domain.services"):
@@ -192,8 +190,7 @@ class TestDomain(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.domain.services") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.infrastructure(\..+)?"
-                ) \
+                    rf"{self.ROOT}\.infrastructure(\. D+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -208,7 +205,7 @@ class TestDomain(BaseArchTest):
                 f"   1. Remove all infrastructure imports from domain services\n"
                 f"   2. Define what you need as interfaces in domain.ports\n"
                 f"   3. Let infrastructure implement these domain interfaces\n"
-                f"   4. Use dependency injection to wire implementations at runtime\n\n"
+                f"   4. Use composition root for wiring dependencies\n\n"
                 f"💡 Core principles being violated:\n"
                 f"   • Dependency Inversion Principle (depend on abstractions)\n"
                 f"   • Clean Architecture dependency rule (inward only)\n"
@@ -225,7 +222,7 @@ class TestDomain(BaseArchTest):
     def test_domain_ports_should_not_import_application_layer(self):
         """
         Test that domain ports do not import application layer modules.
-        
+
         Ports define domain contracts and should be independent of application logic.
         """
         if self._is_empty_package(f"{self.ROOT}.domain.ports"):
@@ -236,8 +233,7 @@ class TestDomain(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.domain.ports") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.application(\..+)?"
-                ) \
+                    rf"{self.ROOT}\.application(\. D+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(
@@ -269,7 +265,7 @@ class TestDomain(BaseArchTest):
     def test_domain_ports_should_not_import_adapters_or_infrastructure(self):
         """
         Test that domain ports do not import adapters or infrastructure.
-        
+
         Ports should be pure abstractions without implementation dependencies.
         """
         if self._is_empty_package(f"{self.ROOT}.domain.ports"):
@@ -280,8 +276,7 @@ class TestDomain(BaseArchTest):
         try:
             Rule().modules_that().are_sub_modules_of(f"{self.ROOT}.domain.ports") \
                 .should_not().import_modules_that().have_name_matching(
-                    rf"{self.ROOT}\.(adapters(\.inbound|\.outbound)?|infrastructure)(\..+)?"
-                ) \
+                    rf"{self.ROOT}\.(adapters(\.inbound|\.outbound)?|infrastructure)(\. D+)?") \
                 .assert_applies(ev)
         except Exception as e:
             pytest.fail(

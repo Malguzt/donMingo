@@ -50,8 +50,7 @@ class TestZulipMapper:
         )
         
         # Should return the created chat message
-        assert result == mock_chat_message
-
+    assert result == mock_chat_message
     @patch('infrastructure.repositories.mappers.zulip_mapper.ChatMessage')
     @patch('infrastructure.repositories.mappers.zulip_mapper.User')
     @patch('infrastructure.repositories.mappers.zulip_mapper.datetime')
@@ -92,3 +91,4 @@ class TestZulipMapper:
         
         # Should return the created chat message
         assert result == mock_chat_message
+

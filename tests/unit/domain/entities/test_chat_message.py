@@ -6,6 +6,7 @@ from datetime import datetime
 # Fixed datetime for deterministic testing
 FIXED_DATETIME = datetime(2024, 1, 1, 12, 0, 0)
 
+
 class TestChatMessage:
     def test_should_create_a_chat_message(self):
         user = User(platform_id="1", platform="telegram", name="John Doe")
@@ -28,7 +29,7 @@ class TestChatMessage:
                 id="", 
                 content="Hello, world!", 
                 sender=user, 
-                created_at=FIXED_DATETIME, 
+                created_at=FIXED_DATETIME,
             )
     
     def test_should_fail_when_creating_a_chat_message_with_null_id(self):
@@ -38,7 +39,7 @@ class TestChatMessage:
                 id=None, 
                 content="Hello, world!", 
                 sender=user, 
-                created_at=FIXED_DATETIME, 
+                created_at=FIXED_DATETIME,
             )
     
     def test_should_fail_when_creating_a_chat_message_with_null_content(self):
@@ -48,7 +49,7 @@ class TestChatMessage:
                 id="1", 
                 content=None, 
                 sender=user, 
-                created_at=FIXED_DATETIME, 
+                created_at=FIXED_DATETIME,
             )
     
     def test_should_create_when_creating_a_chat_message_with_empty_content(self):
@@ -67,7 +68,7 @@ class TestChatMessage:
                 id="1", 
                 content="Hello, world!", 
                 sender=None, 
-                created_at=FIXED_DATETIME, 
+                created_at=FIXED_DATETIME,
             )
 
     def test_should_fail_when_creating_a_chat_message_with_null_created_at(self):

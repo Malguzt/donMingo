@@ -5,8 +5,10 @@ if TYPE_CHECKING:
     # Imported only for type checking to avoid circular import at runtime
     from domain.ports.chat_message_repository import ChatMessageRepository
 
+
 class Channel:
-    def __init__(self, id: str, topic: str, messages: List[ChatMessage], chat_message_repository: "ChatMessageRepository"):
+    def __init__(self, id: str, topic: str, messages: List[ChatMessage], 
+                 chat_message_repository: "ChatMessageRepository"):
         self.id = id
         self.topic = topic
         self.messages = messages

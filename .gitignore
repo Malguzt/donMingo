@@ -215,3 +215,4 @@ lcov.info
 .trunk/configs/.markdownlint.yaml
 .trunk/configs/ruff.toml
 pyproject.toml
+behave-report.json

@@ -2,6 +2,7 @@ from domain.entities.user import User
 
 from datetime import datetime
 
+
 class ChatMessage:
     def __init__(self, id: int, content: str, sender: User, created_at: datetime):
         if not id:

@@ -1,7 +1,3 @@
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'src'))
-
 import pytest
 from unittest.mock import Mock
 import time
@@ -17,7 +13,7 @@ class TestGuanacoSpits:
         worker_1 = SimpleNamespace(work=Mock(return_value=True), name="worker1")
         worker_2 = SimpleNamespace(work=Mock(return_value=True), name="worker2")
         guanacos_repository.get_guanacos.return_value = [worker_1, worker_2]
-        
+
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
 
         # Start workers and let them run briefly, then stop
@@ -39,20 +35,20 @@ class TestGuanacoSpits:
             with lock:
                 execution_counter["count"] += 1
                 execution_counter["max_concurrent"] = max(
-                    execution_counter["max_concurrent"], 
+                    execution_counter["max_concurrent"],
                     execution_counter["count"]
                 )
-            
+
             time.sleep(0.1)  # Simulate work
-            
+
             with lock:
                 execution_counter["count"] -= 1
-            
+
             return True
 
         worker_1 = SimpleNamespace(work=Mock(side_effect=concurrent_work), name="worker1")
         worker_2 = SimpleNamespace(work=Mock(side_effect=concurrent_work), name="worker2")
-        
+
         guanacos_repository.get_guanacos.return_value = [worker_1, worker_2]
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
 
@@ -66,39 +62,39 @@ class TestGuanacoSpits:
     def test_should_handle_empty_repository(self):
         guanacos_repository = Mock(spec=GuanacosRepository)
         guanacos_repository.get_guanacos.return_value = []
-        
+
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
 
         # Should complete without error
         guanacos_spits.run()
-        
+
         assert len(guanacos_spits.get_running_workers()) == 0
 
     def test_should_stop_gracefully(self):
         guanacos_repository = Mock(spec=GuanacosRepository)
         worker = SimpleNamespace(work=Mock(return_value=True), name="test_worker")
         guanacos_repository.get_guanacos.return_value = [worker]
-        
+
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
 
         # Start and verify worker is running
         run_thread = threading.Thread(target=guanacos_spits.run, daemon=True)
         run_thread.start()
         time.sleep(0.15)  # Let it start
-        
+
         assert len(guanacos_spits.get_running_workers()) == 1
-        
+
         # Stop and verify workers are stopped
         guanacos_spits.stop()
         run_thread.join(timeout=1.0)  # Wait for run() to complete
-        
+
         assert len(guanacos_spits.get_running_workers()) == 0
 
     def test_should_handle_keyboard_interrupt_in_run(self):
         guanacos_repository = Mock(spec=GuanacosRepository)
         worker = SimpleNamespace(work=Mock(return_value=True), name="test_worker")
         guanacos_repository.get_guanacos.return_value = [worker]
-        
+
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
 
         # Mock _wait_for_shutdown to raise KeyboardInterrupt
@@ -114,15 +110,15 @@ class TestGuanacoSpits:
         worker1 = SimpleNamespace(work=Mock(return_value=True), name="duplicate_name")
         worker2 = SimpleNamespace(work=Mock(return_value=True), name="duplicate_name")
         guanacos_repository.get_guanacos.return_value = [worker1, worker2]
-        
+
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
 
         # Call _start_all_workers directly to test duplicate handling
         guanacos_spits._start_all_workers()
-        
+
         # Should only have one worker due to duplicate name
         assert len(guanacos_spits._workers) == 1
-        
+
         # Clean up
         guanacos_spits._stop_all_workers()
 
@@ -130,70 +126,70 @@ class TestGuanacoSpits:
         guanacos_repository = Mock(spec=GuanacosRepository)
         worker = SimpleNamespace(work=Mock(return_value=True), name="test_worker")
         guanacos_repository.get_guanacos.return_value = [worker]
-        
+
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
 
         # Mock workers to stop naturally
         def mock_is_running():
             return False  # Workers stopped naturally
-        
+
         # Start the run in a thread and mock workers stopping
         threading.Thread(target=guanacos_spits.run, daemon=True).start()
         time.sleep(0.1)  # Let it start
-        
+
         # Mock all workers as stopped
         for worker in guanacos_spits._workers.values():
             worker.is_running = mock_is_running
-        
+
         time.sleep(0.2)  # Let it detect stopped workers
 
     def test_should_handle_signal_with_unknown_signal_number(self):
         guanacos_spits = GuanacosSpits(Mock(), sleep_time=1)
-        
+
         # Test signal handler with unknown signal
         guanacos_spits._signal_handler(999, None)
-        
+
         assert guanacos_spits._shutdown_requested is True
 
     def test_should_check_specific_worker_running_status(self):
         guanacos_repository = Mock(spec=GuanacosRepository)
         worker = SimpleNamespace(work=Mock(return_value=True), name="test_worker")
         guanacos_repository.get_guanacos.return_value = [worker]
-        
+
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
-        
+
         # Test with non-existent worker
         assert guanacos_spits.is_worker_running("non_existent") is False
-        
+
         # Start worker and test
         threading.Thread(target=guanacos_spits.run, daemon=True).start()
         time.sleep(0.1)  # Let it start
-        
+
         assert guanacos_spits.is_worker_running("test_worker") is True
-        
+
         guanacos_spits.stop()
         time.sleep(0.1)  # Let it stop
 
     def test_should_handle_keyboard_interrupt_in_wait_for_shutdown(self):
         guanacos_repository = Mock(spec=GuanacosRepository)
         guanacos_spits = GuanacosSpits(guanacos_repository, sleep_time=1)
-        
+
         # Add some workers first
         guanacos_spits._workers = {"test": Mock(is_running=Mock(return_value=True))}
-        
+
         # Mock time.sleep to raise KeyboardInterrupt after first call
         original_sleep = time.sleep
         call_count = [0]
-        
+
         def mock_sleep(duration):
             call_count[0] += 1
             if call_count[0] >= 2:  # Raise on second call
                 raise KeyboardInterrupt()
             original_sleep(0.01)  # Short real sleep for first call
-        
+
         import time as time_module
         time_module.sleep = mock_sleep
-        
+
         try:
             # Should re-raise KeyboardInterrupt
             with pytest.raises(KeyboardInterrupt):
@@ -203,6 +199,6 @@ class TestGuanacoSpits:
 
     def test_should_stop_all_workers_when_no_workers_exist(self):
         guanacos_spits = GuanacosSpits(Mock(), sleep_time=1)
-        
+
         # Should handle gracefully when no workers exist
         guanacos_spits._stop_all_workers()  # Should not raise exception
