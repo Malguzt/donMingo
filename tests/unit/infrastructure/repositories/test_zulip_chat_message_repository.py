@@ -193,7 +193,7 @@ class TestZulipChatMessageRepository:
     @patch('infrastructure.repositories.zulip_chat_message_repository.requests')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_raise_error_when_user_not_found_for_private_message(
-        self, mock_config, mock_client, mock_mapper):
+            self, mock_config, mock_client, mock_mapper):
         # Setup mocks
         self._setup_basic_mocks(mock_config, mock_client, mock_mapper)
         

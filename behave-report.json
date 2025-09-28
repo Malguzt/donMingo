@@ -69,11 +69,11 @@
           "location": "features/responde_zulip.feature:8",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:23"
+            "location": "features/steps/responde_zulip_steps.py:20"
           },
           "name": "a mocked Zulip server is running",
           "result": {
-            "duration": 0.00010585784912109375,
+            "duration": 8.559226989746094e-05,
             "status": "passed"
           },
           "step_type": "given"
@@ -83,11 +83,11 @@
           "location": "features/responde_zulip.feature:9",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:4"
+            "location": "features/steps/responde_zulip_steps.py:13"
           },
           "name": "the Zulip API credentials are set as environment variables:",
           "result": {
-            "duration": 0.00010824203491210938,
+            "duration": 0.00010609626770019531,
             "status": "passed"
           },
           "step_type": "given",
@@ -111,11 +111,11 @@
           "location": "features/responde_zulip.feature:12",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:37"
+            "location": "features/steps/responde_zulip_steps.py:33"
           },
           "name": "the Zulip API Mock have a GET /api/v1/messages endpoint to get the messages mocking what this document describe: https://zulip.com/api/get-messages",
           "result": {
-            "duration": 8.845329284667969e-05,
+            "duration": 9.655952453613281e-05,
             "status": "passed"
           },
           "step_type": "given"
@@ -125,11 +125,11 @@
           "location": "features/responde_zulip.feature:13",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:42"
+            "location": "features/steps/responde_zulip_steps.py:38"
           },
           "name": "the Zulip API Mock have a POST /api/v1/messages endpoint to send messages mocking what this document describe: https://zulip.com/api/send-message",
           "result": {
-            "duration": 8.988380432128906e-05,
+            "duration": 8.797645568847656e-05,
             "status": "passed"
           },
           "step_type": "given"
@@ -139,11 +139,11 @@
           "location": "features/responde_zulip.feature:14",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:47"
+            "location": "features/steps/responde_zulip_steps.py:43"
           },
           "name": "the Zulip API Mock have a POST /api/v1/mark_topic_as_read endpoint to mark messages as read mocking what this document describe: https://zulip.com/api/mark-topic-as-read",
           "result": {
-            "duration": 0.00010347366333007812,
+            "duration": 8.535385131835938e-05,
             "status": "passed"
           },
           "step_type": "given"
@@ -153,11 +153,45 @@
           "location": "features/responde_zulip.feature:17",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:57"
+            "location": "features/steps/responde_zulip_steps.py:169"
+          },
+          "name": "the think repository is configured with the following responses:",
+          "result": {
+            "duration": 0.00013494491577148438,
+            "status": "passed"
+          },
+          "step_type": "given",
+          "table": {
+            "headings": [
+              "text",
+              "response"
+            ],
+            "rows": [
+              [
+                "\"Hello\"",
+                "\"Response to Test Topic\""
+              ],
+              [
+                "\"Hello again\"",
+                "\"Response to Another Topic\""
+              ],
+              [
+                "\"Hi there\"",
+                "\"Response to Third Topic\""
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "Given",
+          "location": "features/responde_zulip.feature:22",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:53"
           },
           "name": "the mocked responses a list of 3 unread topic",
           "result": {
-            "duration": 0.00010442733764648438,
+            "duration": 0.00010418891906738281,
             "status": "passed"
           },
           "step_type": "given",
@@ -165,51 +199,55 @@
             "headings": [
               "topic_id",
               "topic_name",
-              "unread_count"
+              "unread_count",
+              "content"
             ],
             "rows": [
               [
                 "1",
                 "\"Test Topic\"",
-                "5"
+                "5",
+                "\"Hello\""
               ],
               [
                 "2",
                 "\"Another Topic\"",
-                "3"
+                "3",
+                "\"Hello again\""
               ],
               [
                 "3",
                 "\"Third Topic\"",
-                "8"
+                "8",
+                "\"Hi there\""
               ]
             ]
           }
         },
         {
           "keyword": "When",
-          "location": "features/responde_zulip.feature:22",
+          "location": "features/responde_zulip.feature:27",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:86"
+            "location": "features/steps/responde_zulip_steps.py:81"
           },
           "name": "the system processes each unread topic",
           "result": {
-            "duration": 5.006712913513184,
+            "duration": 5.0022242069244385,
             "status": "passed"
           },
           "step_type": "when"
         },
         {
           "keyword": "Then",
-          "location": "features/responde_zulip.feature:23",
+          "location": "features/responde_zulip.feature:28",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:94"
+            "location": "features/steps/responde_zulip_steps.py:89"
           },
           "name": "it should send a response to each topic using the official Zulip Client Class",
           "result": {
-            "duration": 0.00013828277587890625,
+            "duration": 0.0003333091735839844,
             "status": "passed"
           },
           "step_type": "then",
@@ -236,14 +274,14 @@
         },
         {
           "keyword": "And",
-          "location": "features/responde_zulip.feature:28",
+          "location": "features/responde_zulip.feature:33",
           "match": {
             "arguments": [],
-            "location": "features/steps/responde_zulip_steps.py:108"
+            "location": "features/steps/responde_zulip_steps.py:103"
           },
           "name": "it should mark each topic as read after responding using the official Zulip Client Class",
           "result": {
-            "duration": 0.00010466575622558594,
+            "duration": 8.511543273925781e-05,
             "status": "passed"
           },
           "step_type": "then",
@@ -263,6 +301,279 @@
               ]
             ]
           }
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/responde_zulip.feature:39",
+      "name": "Infinit loop of getting unread topics and responding",
+      "status": "passed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/responde_zulip.feature:8",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:20"
+          },
+          "name": "a mocked Zulip server is running",
+          "result": {
+            "duration": 7.224082946777344e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:9",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:13"
+          },
+          "name": "the Zulip API credentials are set as environment variables:",
+          "result": {
+            "duration": 8.416175842285156e-05,
+            "status": "passed"
+          },
+          "step_type": "given",
+          "table": {
+            "headings": [
+              "ZULIP_API_KEY",
+              "ZULIP_EMAIL",
+              "ZULIP_SITE"
+            ],
+            "rows": [
+              [
+                "\"test_api_key\"",
+                "\"test@example.com\"",
+                "\"https://127.0.0.1:59485\""
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:12",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:33"
+          },
+          "name": "the Zulip API Mock have a GET /api/v1/messages endpoint to get the messages mocking what this document describe: https://zulip.com/api/get-messages",
+          "result": {
+            "duration": 8.130073547363281e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:13",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:38"
+          },
+          "name": "the Zulip API Mock have a POST /api/v1/messages endpoint to send messages mocking what this document describe: https://zulip.com/api/send-message",
+          "result": {
+            "duration": 7.939338684082031e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:14",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:43"
+          },
+          "name": "the Zulip API Mock have a POST /api/v1/mark_topic_as_read endpoint to mark messages as read mocking what this document describe: https://zulip.com/api/mark-topic-as-read",
+          "result": {
+            "duration": 8.273124694824219e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "Given",
+          "location": "features/responde_zulip.feature:40",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:169"
+          },
+          "name": "the think repository is configured with the following responses:",
+          "result": {
+            "duration": 8.916854858398438e-05,
+            "status": "passed"
+          },
+          "step_type": "given",
+          "table": {
+            "headings": [
+              "text",
+              "response"
+            ],
+            "rows": [
+              [
+                "\"Hello\"",
+                "\"Response to First Topic\""
+              ],
+              [
+                "\"Hello again\"",
+                "\"Response to Second Topic\""
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "Given",
+          "location": "features/responde_zulip.feature:44",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:111"
+          },
+          "name": "the mocked responses a list of 2 unread topic on the first call",
+          "result": {
+            "duration": 7.724761962890625e-05,
+            "status": "passed"
+          },
+          "step_type": "given",
+          "table": {
+            "headings": [
+              "topic_id",
+              "topic_name",
+              "unread_count",
+              "content"
+            ],
+            "rows": [
+              [
+                "1",
+                "\"First Topic\"",
+                "4",
+                "\"Hello\""
+              ],
+              [
+                "2",
+                "\"Second Topic\"",
+                "6",
+                "\"Hello again\""
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:48",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:123"
+          },
+          "name": "the mocked responses an empty list of unread topic on the second call",
+          "result": {
+            "duration": 9.679794311523438e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/responde_zulip.feature:49",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:127"
+          },
+          "name": "the system runs for 2 iterations of checking for unread topics and responding",
+          "result": {
+            "duration": 10.002294063568115,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/responde_zulip.feature:50",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:135"
+          },
+          "name": "it should send a response to each topic in the first iteration using the official Zulip Client Class",
+          "result": {
+            "duration": 0.0006563663482666016,
+            "status": "passed"
+          },
+          "step_type": "then",
+          "table": {
+            "headings": [
+              "topic_id",
+              "response_message"
+            ],
+            "rows": [
+              [
+                "1",
+                "\"Response to First Topic\""
+              ],
+              [
+                "2",
+                "\"Response to Second Topic\""
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:54",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:149"
+          },
+          "name": "it should mark each topic as read after responding in the first iteration using the official Zulip Client Class",
+          "result": {
+            "duration": 8.535385131835938e-05,
+            "status": "passed"
+          },
+          "step_type": "then",
+          "table": {
+            "headings": [
+              "topic_id"
+            ],
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:58",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:157"
+          },
+          "name": "it should not send any response in the second iteration since there are no unread topics",
+          "result": {
+            "duration": 7.319450378417969e-05,
+            "status": "passed"
+          },
+          "step_type": "then"
+        },
+        {
+          "keyword": "And",
+          "location": "features/responde_zulip.feature:59",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/responde_zulip_steps.py:163"
+          },
+          "name": "it should not mark any topics as read in the second iteration since there are no unread topics",
+          "result": {
+            "duration": 7.033348083496094e-05,
+            "status": "passed"
+          },
+          "step_type": "then"
         }
       ],
       "tags": [],

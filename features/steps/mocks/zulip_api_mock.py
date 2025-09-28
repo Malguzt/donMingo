@@ -24,11 +24,17 @@ class ZulipAPIMock:
         self.server_thread = None
         self.config = {"api_key": "default_api_key"}
         self._server = None # To hold the uvicorn server instance
+        self.get_messages_calls = 0
 
         @self.app.get("/api/v1/messages")
         async def get_messages(request: Request):
             messages = []
-            for topic in self.unread_topics:
+            topics_to_return = []
+            if self.get_messages_calls < len(self.unread_topics):
+                topics_to_return = self.unread_topics[self.get_messages_calls]
+                self.get_messages_calls += 1
+
+            for topic in topics_to_return:
                 messages.append({
                     "id": topic["topic_id"],
                     "type": "stream",
@@ -88,8 +94,8 @@ class ZulipAPIMock:
                 },
             }
 
-    def set_unread_topics(self, topics):
-        self.unread_topics = topics
+    def add_unread_topics_response(self, topics):
+        self.unread_topics.append(topics)
 
     def get_sent_messages(self):
         return self.sent_messages
@@ -114,6 +120,7 @@ class ZulipAPIMock:
         self.unread_topics = []
         self.sent_messages = []
         self.read_topics = []
+        self.get_messages_calls = 0
         self.config = {"api_key": "default_api_key"}
 
 zulip_mock_server = ZulipAPIMock()

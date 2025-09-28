@@ -14,11 +14,16 @@ Feature: Responde Zulip Integration
         And the Zulip API Mock have a POST /api/v1/mark_topic_as_read endpoint to mark messages as read mocking what this document describe: https://zulip.com/api/mark-topic-as-read
     
     Scenario: Response unread topics from Zulip
+        Given the think repository is configured with the following responses:
+            | text        | response                    |
+            | "Hello"     | "Response to Test Topic"    |
+            | "Hello again" | "Response to Another Topic" |
+            | "Hi there"  | "Response to Third Topic"   |
         Given the mocked responses a list of 3 unread topic
-          | topic_id | topic_name       | unread_count |
-          | 1        | "Test Topic"     | 5            |
-          | 2        | "Another Topic"  | 3            |
-          | 3        | "Third Topic"    | 8            |
+          | topic_id | topic_name       | unread_count | content       |
+          | 1        | "Test Topic"     | 5            | "Hello"       |
+          | 2        | "Another Topic"  | 3            | "Hello again" |
+          | 3        | "Third Topic"    | 8            | "Hi there"    |
         When the system processes each unread topic
         Then it should send a response to each topic using the official Zulip Client Class
           | topic_id | response_message               |
@@ -30,3 +35,25 @@ Feature: Responde Zulip Integration
           | 1        |
           | 2        |
           | 3        |
+      
+      Scenario: Infinit loop of getting unread topics and responding
+        Given the think repository is configured with the following responses:
+            | text        | response                     |
+            | "Hello"     | "Response to First Topic"  |
+            | "Hello again" | "Response to Second Topic" |
+        Given the mocked responses a list of 2 unread topic on the first call
+          | topic_id | topic_name       | unread_count | content       |
+          | 1        | "First Topic"    | 4            | "Hello"       |
+          | 2        | "Second Topic"   | 6            | "Hello again" |
+        And the mocked responses an empty list of unread topic on the second call
+        When the system runs for 2 iterations of checking for unread topics and responding
+        Then it should send a response to each topic in the first iteration using the official Zulip Client Class
+          | topic_id | response_message               |
+          | 1        | "Response to First Topic"      |
+          | 2        | "Response to Second Topic"     |
+        And it should mark each topic as read after responding in the first iteration using the official Zulip Client Class
+          | topic_id |
+          | 1        |
+          | 2        |
+        And it should not send any response in the second iteration since there are no unread topics
+        And it should not mark any topics as read in the second iteration since there are no unread topics

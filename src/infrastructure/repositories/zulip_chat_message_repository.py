@@ -1,8 +1,10 @@
 from domain.ports.chat_message_repository import ChatMessageRepository
 from domain.entities.user import User
 from domain.entities.chat_message import ChatMessage
+
 from typing import List, Dict
 import requests
+import json
 from infrastructure.config.zulip_config import ZulipConfig
 from typing import Optional
 from infrastructure.repositories.mappers.zulip_mapper import ZulipMapper
@@ -57,13 +59,11 @@ class ZulipChatMessageRepository(ChatMessageRepository):
             "anchor": "first_unread",
             "num_before": 0,
             "num_after": 200,
-            "use_first_unread_anchor": True,
-            "narrow": [
-                {"operator": "is", "operand": "unread"},
-            ],
-            "apply_markdown": True,
-            "include_anchor": True,
-            "include_history": True,
+            "use_first_unread_anchor": "true",
+            "narrow": json.dumps([{"operator": "is", "operand": "unread"}]),
+            "apply_markdown": "true",
+            "include_anchor": "true",
+            "include_history": "true",
         }
 
         try:
