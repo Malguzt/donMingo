@@ -16,3 +16,5 @@ pytest-xdist
 pytest-mock
 pytest-asyncio
 pytest-timeout
+psutil
+prometheus-client\nopentelemetry-api\nopentelemetry-sdk\nopentelemetry-exporter-otlp
