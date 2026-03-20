@@ -37,6 +37,11 @@ class HardwareProfiler:
                 }
         return gpu_info
 
+    def get_total_available_vram_gb(self) -> float:
+        """Returns the sum of safe limit GB across all available GPUs."""
+        gpu_info = self.get_gpu_vram_info()
+        return sum(info["safe_limit_gb"] for info in gpu_info.values())
+
     def generate_max_memory_mapping(self) -> Dict[Any, str]:
         """
         Generates the max_memory dictionary required by HuggingFace's from_pretrained

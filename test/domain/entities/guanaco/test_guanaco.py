@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from datetime import datetime
 from domain.entities.guanaco.guanaco import Guanaco
 from domain.entities.user import User
 from domain.errors import MissingUserError, MissingRepositoryError
@@ -34,7 +35,12 @@ class TestGuanaco:
         mock_chat_repo = Mock(ChatMessageRepository)
         channel = Mock(Channel)
         user = Mock(User)
-        channel.get_last_message.return_value = Mock(sender=user)
+        last_msg = Mock()
+        last_msg.id = 1
+        last_msg.sender = user
+        last_msg.content = "hola"
+        last_msg.created_at = datetime.now()
+        channel.get_messages.return_value = [last_msg]
         mock_chat_repo.get_streams_with_unread_messages.return_value = {
             "1": channel
         }
@@ -56,7 +62,14 @@ class TestGuanaco:
         channel = Mock(Channel)
         guanaco_user = Mock(User)
         last_sender = Mock(User)
-        channel.get_last_message.return_value = Mock(sender=last_sender)
+        msg1 = Mock()
+        msg1.id = 1
+        msg1.sender = last_sender
+        msg1.content = "¿primer mensaje?"
+        msg1.created_at = datetime.now()
+        channel.get_messages.return_value = [msg1]
+        channel.get_id.return_value = "pm:user@example.com"
+        channel.get_topic.return_value = "General"
         mock_chat_repo.get_streams_with_unread_messages.return_value = {
             "1": channel
         }
@@ -68,6 +81,11 @@ class TestGuanaco:
 
         result = guanaco.work()
 
+        assert mock_think_repo.get_think.call_count == 1
+        think_prompt = mock_think_repo.get_think.call_args[0][0]
+        assert "Historial reciente (hasta 20 mensajes previos)" in think_prompt
+        assert "MENSAJE_ACTUAL:" in think_prompt
+        assert "¿primer mensaje?" in think_prompt
         assert channel.respond.call_args[0][0] == "I think I'm a guanaco"
         assert result is True
     

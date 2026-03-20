@@ -12,11 +12,11 @@ class ZulipBotManager:
             site=self.config.site,
         )
 
-    def create_bot(self, full_name: str, short_name: str, bot_type: int = 1) -> str:
+    def create_bot(self, full_name: str, short_name: str, bot_type: int = 1) -> dict:
         """
         Creates a new bot in the Zulip organization.
         bot_type: 1 for Generic bot.
-        Returns the API key of the created bot or raises an Exception.
+        Returns a dictionary with 'api_key' and 'email'.
         """
         request_paylod = {
             "full_name": full_name,
@@ -33,24 +33,30 @@ class ZulipBotManager:
         if response.get("result") != "success":
             raise RuntimeError(f"Error creating bot {full_name}: {response.get('msg')}")
             
-        return response.get("api_key", "")
+        return {
+            "api_key": response.get("api_key", ""),
+            "email": response.get("email", ""),
+            "full_name": full_name,
+            "short_name": short_name
+        }
 
     def deactivate_bot(self, email: str) -> bool:
         """
         Deactivates an existing bot in the Zulip organization.
-        Returns True if successful, raises an Exception otherwise.
+        Returns True if successful or already absent/deactivated.
         """
-        # Find the user ID dynamically based on the email
         user_id = self._find_user_id_by_email(email)
-        if user_id is None:
-             raise ValueError(f"Bot with email {email} not found")
-             
-        response = self.client.call_endpoint(
-            url=f"users/{user_id}",
-            method="DELETE"
-        )
+        if not user_id:
+            # Already absent in realm users listing.
+            return True
+            
+        response = self.client.deactivate_user_by_id(user_id)
         
         if response.get("result") != "success":
+            msg = (response.get("msg") or "").lower()
+            if "no such user" in msg:
+                # Idempotent delete: if user is already gone, treat as success.
+                return True
             raise RuntimeError(f"Error deactivating bot {email}: {response.get('msg')}")
             
         return True

@@ -124,6 +124,7 @@ class TestZulipChatMessageRepository:
         
         # Mock API response
         api_response = {
+            "result": "success",
             "messages": [
                 {"id": 1, "content": "Channel message"}
             ]
@@ -139,7 +140,7 @@ class TestZulipChatMessageRepository:
         # Should call API with channel-specific parameters
         expected_params = {
             "anchor": "newest",
-            "num_before": 500,
+            "num_before": 20,
             "num_after": 0,
             "narrow": [
                 {"operator": "stream", "operand": "42"},
@@ -418,8 +419,8 @@ class TestZulipChatMessageRepository:
         
         # Mock raw messages (what comes from Zulip API)
         raw_messages = [
-            {"stream_id": "42", "subject": "Discussion", "id": 1, "content": "Hello"},
-            {"stream_id": "43", "subject": "Chat", "id": 2, "content": "World"}
+            {"type": "stream", "stream_id": "42", "subject": "Discussion", "id": 1, "content": "Hello"},
+            {"type": "stream", "stream_id": "43", "subject": "Chat", "id": 2, "content": "World"}
         ]
         
         # Mock unread messages response
@@ -437,6 +438,8 @@ class TestZulipChatMessageRepository:
         # Mock channel creation
         mock_channel1 = Mock()
         mock_channel2 = Mock()
+        mock_channel1.get_messages.return_value = [mock_message1]
+        mock_channel2.get_messages.return_value = [mock_message2]
         mock_channel_class.side_effect = [mock_channel1, mock_channel2]
         
         # Mock get_messages_from_channel to return additional messages
@@ -463,15 +466,15 @@ class TestZulipChatMessageRepository:
             mock_get_channel_msgs.assert_any_call(mock_channel1)
             mock_get_channel_msgs.assert_any_call(mock_channel2)
             
-            # Should add channel messages
-            mock_channel1.add_message.assert_any_call(mock_channel_msg1)
-            mock_channel2.add_message.assert_any_call(mock_channel_msg2)
-            
-            # Should return channels by stream ID
-            assert "42" in result
-            assert "43" in result
-            assert result["42"] == mock_channel1
-            assert result["43"] == mock_channel2
+            # Should merge messages into channel state
+            assert len(mock_channel1.messages) == 2
+            assert len(mock_channel2.messages) == 2
+
+            # Should return channels by grouped key
+            assert "stream:42:Discussion" in result
+            assert "stream:43:Chat" in result
+            assert result["stream:42:Discussion"] == mock_channel1
+            assert result["stream:43:Chat"] == mock_channel2
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
     @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')

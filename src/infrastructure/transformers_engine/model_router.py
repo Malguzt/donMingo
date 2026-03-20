@@ -1,4 +1,6 @@
+import os
 from typing import Optional
+import torch
 from .model_catalog import ModelCatalog, ModelComplexity, ModelSpecialty, ModelDefinition
 
 class ModelRouter:
@@ -6,6 +8,16 @@ class ModelRouter:
 
     def __init__(self, catalog: ModelCatalog):
         self.catalog = catalog
+        self.default_complexity = self._read_default_complexity()
+
+    def _read_default_complexity(self) -> ModelComplexity:
+        raw = os.getenv("DEFAULT_BOT_COMPLEXITY", "medium").strip().lower()
+        mapping = {
+            "small": ModelComplexity.SMALL,
+            "medium": ModelComplexity.MEDIUM,
+            "large": ModelComplexity.LARGE,
+        }
+        return mapping.get(raw, ModelComplexity.MEDIUM)
 
     def route_prompt(self, prompt: str, required_complexity: Optional[ModelComplexity] = None) -> ModelDefinition:
         """
@@ -48,10 +60,19 @@ class ModelRouter:
         """
         if specialty == ModelSpecialty.REASONING:
             return ModelComplexity.LARGE
-            
-        # If the prompt is very long, it might need a larger context model,
-        # but for now we correlate prompt length with task complexity.
-        if len(prompt) > 1000:
-            return ModelComplexity.MEDIUM
-            
-        return ModelComplexity.SMALL
+
+        # If no GPU is available, stay small by default.
+        if not torch.cuda.is_available():
+            if len(prompt) > 1000:
+                return ModelComplexity.MEDIUM
+            return ModelComplexity.SMALL
+
+        # On GPU, default to medium to better utilize VRAM and quality.
+        # Extremely short prompts can stay small.
+        if len(prompt.strip()) <= 25:
+            return ModelComplexity.SMALL
+
+        if len(prompt) > 1600:
+            return ModelComplexity.LARGE
+
+        return self.default_complexity

@@ -37,7 +37,7 @@ class ModelCatalog:
                 huggingface_id="Qwen/Qwen2.5-7B-Instruct",
                 complexity=ModelComplexity.MEDIUM,
                 specialty=ModelSpecialty.CHAT,
-                estimated_vram_gb=16.0
+                estimated_vram_gb=15.0 # ~14GB BF16 + overhead
             ),
             ModelDefinition(
                 huggingface_id="Qwen/Qwen2.5-Coder-1.5B",
@@ -49,13 +49,13 @@ class ModelCatalog:
                 huggingface_id="Qwen/Qwen2.5-Coder-7B",
                 complexity=ModelComplexity.MEDIUM,
                 specialty=ModelSpecialty.CODE,
-                estimated_vram_gb=16.0
+                estimated_vram_gb=15.0 # ~14GB BF16 + overhead
             ),
             ModelDefinition(
                 huggingface_id="Qwen/Qwen2.5-32B-Instruct",
                 complexity=ModelComplexity.LARGE,
                 specialty=ModelSpecialty.REASONING,
-                estimated_vram_gb=65.0
+                estimated_vram_gb=68.0 # ~64GB BF16 + overhead
             ) # Large models will naturally use device_map="auto" to offload to RAM
         ]
         
