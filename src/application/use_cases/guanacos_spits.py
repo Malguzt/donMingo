@@ -5,12 +5,10 @@ Follows Clean Architecture principles by orchestrating domain entities through r
 """
 
 import time
-import threading
 import signal
-import sys
-from typing import List, Dict
+from typing import List, Dict, Optional
 from domain.ports.guanacos_repository import GuanacosRepository
-from infrastructure.workers.guanaco_worker import GuanacoWorker
+from application.ports.worker_factory import WorkerFactory, WorkerHandle
 
 
 class GuanacosSpits:
@@ -19,15 +17,26 @@ class GuanacosSpits:
     Coordinates the execution of multiple Guanacos concurrently with proper lifecycle management.
     """
     
-    def __init__(self, guanacos_repository: GuanacosRepository, sleep_time: int = 10):
+    def __init__(
+        self,
+        guanacos_repository: GuanacosRepository,
+        sleep_time: int = 10,
+        worker_factory: Optional[WorkerFactory] = None,
+    ):
         self.guanacos_repository = guanacos_repository
         self.sleep_time = sleep_time
-        self._workers: Dict[str, GuanacoWorker] = {}
+        self.worker_factory = worker_factory or self._build_default_factory()
+        self._workers: Dict[str, WorkerHandle] = {}
         self._shutdown_requested = False
         
         # Set up signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
+
+    def _build_default_factory(self) -> WorkerFactory:
+        # Lazy import avoids hard coupling at module import time.
+        from infrastructure.workers.guanaco_worker_factory import GuanacoWorkerFactory
+        return GuanacoWorkerFactory()
 
     def run(self) -> None:
         """
@@ -62,7 +71,7 @@ class GuanacosSpits:
                 print(f"[WARNING] Worker with ID '{worker_id}' already exists, skipping")
                 continue
             
-            worker = GuanacoWorker(guanaco, self.sleep_time)
+            worker = self.worker_factory.create(guanaco, self.sleep_time)
             self._workers[worker_id] = worker
             worker.start()
         

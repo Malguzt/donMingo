@@ -3,25 +3,22 @@ from domain.entities.user import User
 from domain.errors import MissingUserError, MissingRepositoryError
 from domain.ports.think_repository import ThinkRepository
 from application.services.should_respond_gate import ShouldRespondGate
+from application.services.conversation_context_builder import ConversationContextBuilder
 from infrastructure.observability.metrics import (
     BOT_UNREAD_MESSAGES,
     MSGS_PROCESSED,
     THINK_DURATION,
 )
 import time
-import re
-from typing import List
-from domain.entities.chat_message import ChatMessage
 
 class Guanaco:
-    CONTEXT_HISTORY_LIMIT = 20
-
     def __init__(self, name: str = None, user: User = None, chat_message_repository: ChatMessageRepository = None, think_repository: ThinkRepository = None):
         self.name = name
         self.user = user
         self.chat_message_repository = chat_message_repository
         self.think_repository = think_repository
         self._respond_gate = ShouldRespondGate()
+        self._context_builder = ConversationContextBuilder(history_limit=20)
 
     def _infer_role(self) -> str:
         think_repo_name = self.think_repository.__class__.__name__.lower() if self.think_repository else ""
@@ -29,45 +26,6 @@ class Guanaco:
         if "hr" in think_repo_name or "recursos humanos" in bot_name:
             return "hr"
         return "general"
-
-    def _sanitize_content(self, content: str) -> str:
-        text = re.sub(r"<[^>]+>", "", content or "")
-        return re.sub(r"\s+", " ", text).strip()
-
-    def _get_deduped_messages(self, messages: List[ChatMessage]) -> List[ChatMessage]:
-        by_id = {}
-        for msg in messages or []:
-            if hasattr(msg, "id"):
-                by_id[msg.id] = msg
-        ordered = list(by_id.values())
-        ordered.sort(key=lambda m: (getattr(m, "created_at", None), getattr(m, "id", 0)))
-        return ordered
-
-    def _build_context_prompt(self, channel, target_message: ChatMessage, ordered_messages: List[ChatMessage]) -> str:
-        target_index = max((idx for idx, m in enumerate(ordered_messages) if m.id == target_message.id), default=len(ordered_messages) - 1)
-        previous = ordered_messages[max(0, target_index - self.CONTEXT_HISTORY_LIMIT):target_index]
-
-        lines = []
-        for msg in previous:
-            sender = getattr(getattr(msg, "sender", None), "name", "Unknown")
-            content = self._sanitize_content(getattr(msg, "content", ""))
-            if content:
-                lines.append(f"{sender}: {content}")
-
-        history_text = "\n".join(lines) if lines else "(sin historial previo relevante)"
-        current_text = self._sanitize_content(target_message.content)
-        channel_type = "mensaje directo" if str(channel.get_id()).startswith("pm:") else "canal"
-
-        return (
-            "Responde en español, de forma útil y concisa.\n"
-            f"Tipo de conversación: {channel_type}\n"
-            f"Tópico: {channel.get_topic()}\n"
-            f"Historial reciente (hasta {self.CONTEXT_HISTORY_LIMIT} mensajes previos):\n"
-            f"{history_text}\n\n"
-            "MENSAJE_ACTUAL:\n"
-            f"{current_text}\n\n"
-            "Usa el historial para mantener contexto, pero responde específicamente al MENSAJE_ACTUAL."
-        )
 
     def work(self):
         """Process unread messages once. Returns True if work was performed, False otherwise."""
@@ -107,7 +65,7 @@ class Guanaco:
         for channel in channels.values():
             print(f"Channel: {channel}")
             try:
-                ordered_messages = self._get_deduped_messages(channel.get_messages())
+                ordered_messages = self._context_builder.dedupe_and_sort_messages(channel.get_messages())
                 if not ordered_messages:
                     continue
                 last_message = ordered_messages[-1]
@@ -128,7 +86,7 @@ class Guanaco:
                     start_time = time.time()
                     
                     # Processing message
-                    prompt = self._build_context_prompt(channel, last_message, ordered_messages)
+                    prompt = self._context_builder.build_prompt(channel, last_message, ordered_messages)
                     response_text = self.think_repository.get_think(prompt)
                     channel.respond(response_text)
                     

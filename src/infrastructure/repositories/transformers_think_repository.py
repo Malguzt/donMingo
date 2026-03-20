@@ -7,4 +7,6 @@ class TransformersThinkRepository(ThinkRepository):
         self.transformers_engine = ModelsHandler()
 
     def get_think(self, message: str, required_complexity: ModelComplexity = None) -> str:
+        if required_complexity is None:
+            return self.transformers_engine.generate_text(message)
         return self.transformers_engine.generate_text(message, required_complexity=required_complexity)
