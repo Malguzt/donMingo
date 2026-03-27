@@ -158,6 +158,27 @@ class TestZulipChatMessageRepository:
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
     @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
+    def test_should_return_empty_history_when_stream_channel_is_unknown(self, mock_config_class, mock_client_class, mock_mapper_class):
+        self._setup_basic_mocks(mock_config_class, mock_client_class, mock_mapper_class)
+
+        mock_client = mock_client_class.return_value
+        mock_client.get_messages.return_value = {
+            "result": "error",
+            "msg": "Invalid narrow operator: unknown channel 520776",
+        }
+
+        mock_channel = Mock()
+        mock_channel.get_id.return_value = "520776"
+        mock_channel.get_topic.return_value = "general"
+
+        repository = ZulipChatMessageRepository()
+        result = repository.get_messages_from_channel(mock_channel)
+
+        assert result == []
+
+    @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
     def test_should_send_private_message_successfully(self, mock_config_class, mock_client_class, mock_mapper_class):
         # Setup mocks
         self._setup_basic_mocks(mock_config_class, mock_client_class, mock_mapper_class)
@@ -315,6 +336,26 @@ class TestZulipChatMessageRepository:
         
         with pytest.raises(RuntimeError, match="Zulip API error: Stream not found"):
             repository.mark_as_read(mock_channel)
+
+    @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')
+    @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipConfig')
+    def test_should_ignore_unknown_channel_on_mark_as_read(self, mock_config_class, mock_client_class, mock_mapper_class):
+        self._setup_basic_mocks(mock_config_class, mock_client_class, mock_mapper_class)
+
+        mock_client = mock_client_class.return_value
+        mock_client.mark_stream_as_read.return_value = {
+            "result": "error",
+            "msg": "Invalid narrow operator: unknown channel 520776",
+        }
+
+        mock_channel = Mock()
+        mock_channel.get_id.return_value = "520776"
+
+        repository = ZulipChatMessageRepository()
+        repository.mark_as_read(mock_channel)
+
+        mock_client.mark_stream_as_read.assert_called_once_with("520776")
 
     @patch('infrastructure.repositories.zulip_chat_message_repository.ZulipMapper')
     @patch('infrastructure.repositories.zulip_chat_message_repository.zulip.Client')

@@ -22,6 +22,10 @@ class ZulipChatMessageRepository(ChatMessageRepository):
         )
         self.mapper = ZulipMapper()
 
+    def _is_unknown_channel_error(self, msg: str) -> bool:
+        text = (msg or "").lower()
+        return "unknown channel" in text or "invalid narrow operator" in text
+
     def __group_unread_messages(self, messages: List[ChatMessage]) -> Dict[str, Channel]:
         # Group unread messages by stream topic or private conversation.
         channels = {}
@@ -92,7 +96,14 @@ class ZulipChatMessageRepository(ChatMessageRepository):
             "include_history": True,
         })
         if response.get("result") != "success":
-            raise RuntimeError(f"Zulip API error: {response.get('msg')}")
+            msg = response.get("msg", "")
+            if self._is_unknown_channel_error(msg):
+                # Stream was deleted/renamed after unread fetch; fallback to unread-only context.
+                print(
+                    f"[WARNING] Skipping history fetch for missing stream channel {channel.get_id()}: {msg}"
+                )
+                return []
+            raise RuntimeError(f"Zulip API error: {msg}")
         return [self.mapper.to_chat_message(msg) for msg in response.get("messages", [])]
 
     def _dedupe_and_order_messages(self, messages: List[ChatMessage]) -> List[ChatMessage]:
@@ -122,7 +133,14 @@ class ZulipChatMessageRepository(ChatMessageRepository):
         messages = self.get_unread_messages()
         channels = self.__group_unread_messages(messages)
         for channel in channels.values():
-            history_messages = self.get_messages_from_channel(channel)
+            try:
+                history_messages = self.get_messages_from_channel(channel)
+            except RuntimeError as e:
+                if self._is_unknown_channel_error(str(e)):
+                    print(f"[WARNING] Continuing without history for channel {channel.get_id()}: {e}")
+                    history_messages = []
+                else:
+                    raise
             merged = self._dedupe_and_order_messages(channel.get_messages() + history_messages)
             channel.messages = merged
         return channels
@@ -228,7 +246,11 @@ class ZulipChatMessageRepository(ChatMessageRepository):
 
         response = self.client.mark_stream_as_read(channel.get_id())
         if response.get("result") != "success":
-            raise RuntimeError(f"Zulip API error: {response.get('msg')}")
+            msg = response.get("msg", "")
+            if self._is_unknown_channel_error(msg):
+                print(f"[WARNING] Stream no longer exists while marking as read ({channel.get_id()}): {msg}")
+                return
+            raise RuntimeError(f"Zulip API error: {msg}")
 
     def _find_user_id_by_email(self, email: str) -> Optional[int]:
         users_response = self.client.get_users()

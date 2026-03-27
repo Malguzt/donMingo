@@ -3,7 +3,7 @@ from domain.entities.guanaco.guanaco import Guanaco
 from domain.entities.user import User
 from infrastructure.database.sqlite_manager import SqliteManager
 from infrastructure.repositories.zulip_chat_message_repository import ZulipChatMessageRepository
-from infrastructure.repositories.transformers_think_repository import TransformersThinkRepository
+from infrastructure.repositories.http_think_repository import HttpThinkRepository
 from infrastructure.repositories.hr_think_repository import HRThinkRepository
 from typing import List
 import sqlite3
@@ -35,10 +35,11 @@ class SQLGuanacosRepository(GuanacosRepository):
                 )
                 
                 # Assign think repository based on type
+                http_think_repo = HttpThinkRepository()
                 if row["bot_type"] == "hr":
-                    think_repo = HRThinkRepository(self)
+                    think_repo = HRThinkRepository(self, nlp_engine=http_think_repo)
                 else:
-                    think_repo = TransformersThinkRepository()
+                    think_repo = http_think_repo
                 
                 # Mock user for the bot (Zulip bots act as users)
                 bot_user = User(platform_id=row["id"], platform="zulip", name=row["name"])

@@ -1,11 +1,10 @@
 import json
 import re
-from domain.ports.think_repository import ThinkRepository
+from domain.ports.think_repository import ThinkRepository, ModelComplexity, ModelSpecialty
 from domain.entities.user import User
 from infrastructure.repositories.zulip_bot_manager import ZulipBotManager
-from infrastructure.repositories.transformers_think_repository import TransformersThinkRepository
+from infrastructure.repositories.http_think_repository import HttpThinkRepository
 from domain.ports.guanacos_repository import GuanacosRepository
-from infrastructure.transformers_engine.model_catalog import ModelComplexity
 from typing import Optional, Dict, List
 import sqlite3
 
@@ -14,8 +13,8 @@ class HRThinkRepository(ThinkRepository):
     Parses natural language requests to create or delete bots 
     and uses the ZulipBotManager to execute the actions.
     """
-    def __init__(self, guanacos_repository: Optional[GuanacosRepository] = None):
-        self.nlp_engine = TransformersThinkRepository()
+    def __init__(self, guanacos_repository: Optional[GuanacosRepository] = None, nlp_engine: Optional[ThinkRepository] = None):
+        self.nlp_engine = nlp_engine or HttpThinkRepository()
         self.bot_manager = ZulipBotManager()
         self.guanacos_repository = guanacos_repository
 

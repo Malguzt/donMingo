@@ -1,9 +1,6 @@
 zulip
 python-dotenv
 arize
-transformers
-torch
-accelerate
 invoke
 pytest
 pytest-cov
@@ -17,4 +14,8 @@ pytest-mock
 pytest-asyncio
 pytest-timeout
 psutil
-prometheus-client\nopentelemetry-api\nopentelemetry-sdk\nopentelemetry-exporter-otlp
+prometheus-client
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+requests

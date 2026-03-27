@@ -14,7 +14,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 def setup_telemetry():
     """Sets up OpenTelemetry tracing exporting to Arize Phoenix."""
     resource = Resource(attributes={
-        "service.name": "donmingo-agent"
+        "service.name": "donmingo-agents"
     })
 
     provider = TracerProvider(resource=resource)
@@ -53,12 +53,7 @@ def main():
     # Configure traces.
     setup_telemetry()
 
-    # Preload models in background before workers start.
-    from infrastructure.transformers_engine.models_handler import ModelsHandler
-
-    models_handler = ModelsHandler()
-    models_handler.preload_models()
-    print("[INFO] Model preload started in background...")
+    print("[INFO] donMingo linked to Yaguarete Proxy")
 
     # Start the workers and run until shutdown.
     guanacos_spits.run()
